@@ -1,0 +1,96 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model RideModel {
+  rideId String @id @default(uuid())
+
+  kickboardId String
+  platformId  String
+  franchiseId String
+  regionId    String
+  discountId  String?
+
+  // 보험 정보
+  userId   String
+  realname String
+  phone    String
+  birthday DateTime
+
+  // 반납 사진
+  returnedURL String?
+
+  // 시작
+  startedAt DateTime @default(now())
+
+  // 종료(종료 시간, 종료 타입)
+  terminatedAt   DateTime?
+  terminatedType RideTerminatedType?
+
+  terminatedPhoneLocationId String?
+  terminatedPhoneLocation   LocationModel? @relation("TerminatedPhoneLocation", fields: [terminatedPhoneLocationId], references: [terminatedPhoneLocationId])
+
+  terminatedKickboardLocationId String?
+  terminatedKickboardLocation   LocationModel? @relation("TerminatedKickboardLocation", fields: [terminatedKickboardLocationId], references: [terminatedKickboardLocationId])
+
+  hasPenalty    Boolean        @default(false)
+  paidPrice     Int // 결제 금액
+  totalPrice    Int // 총 금액
+  discountPrice Int // 할인 금액
+  payments      PaymentModel[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model LocationModel {
+  locationId String @id @default(uuid())
+
+  latitude  Int
+  longitude Int
+
+  terminatedPhoneLocationId String?
+  terminatedPhoneLocation   RideModel? @relation("TerminatedPhoneLocation")
+
+  terminatedKickboardLocationId String?
+  terminatedKickboardLocation   RideModel? @relation("TerminatedKickboardLocation")
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+enum RideTerminatedType {
+  USER_REQUESTED
+  ADMIN_REQUESTED
+  UNUSED
+}
+
+model PaymentModel {
+  paymentId   String  @id @default(uuid())
+  description String?
+
+  paymentType PaymentType
+  amount      Int
+
+  rideId String
+  ride   RideModel @relation(fields: [rideId], references: [rideId])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+enum PaymentType {
+  SERVICE
+  PENALTY
+}

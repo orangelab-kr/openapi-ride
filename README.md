@@ -1,1 +1,1 @@
-# TypeScript Template
+# HIKICK OpenAPI Ride
