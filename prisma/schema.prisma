@@ -13,11 +13,13 @@ generator client {
 model RideModel {
   rideId String @id @default(uuid())
 
-  kickboardId String
-  platformId  String
-  franchiseId String
-  regionId    String
-  discountId  String?
+  kickboardCode   String
+  platformId      String
+  franchiseId     String
+  regionId        String
+  discountGroupId String?
+  discountId      String?
+  insuranceId     String
 
   // 보험 정보
   userId   String
@@ -31,20 +33,26 @@ model RideModel {
   // 시작
   startedAt DateTime @default(now())
 
+  startedPhoneLocationId String?
+  startedPhoneLocation   LocationModel? @relation("StartedPhoneLocation", fields: [startedPhoneLocationId], references: [locationId])
+
+  startedKickboardLocationId String?
+  startedKickboardLocation   LocationModel? @relation("StartedKickboardLocation", fields: [startedKickboardLocationId], references: [locationId])
+
   // 종료(종료 시간, 종료 타입)
   terminatedAt   DateTime?
   terminatedType RideTerminatedType?
 
   terminatedPhoneLocationId String?
-  terminatedPhoneLocation   LocationModel? @relation("TerminatedPhoneLocation", fields: [terminatedPhoneLocationId], references: [terminatedPhoneLocationId])
+  terminatedPhoneLocation   LocationModel? @relation("TerminatedPhoneLocation", fields: [terminatedPhoneLocationId], references: [locationId])
 
   terminatedKickboardLocationId String?
-  terminatedKickboardLocation   LocationModel? @relation("TerminatedKickboardLocation", fields: [terminatedKickboardLocationId], references: [terminatedKickboardLocationId])
+  terminatedKickboardLocation   LocationModel? @relation("TerminatedKickboardLocation", fields: [terminatedKickboardLocationId], references: [locationId])
 
-  hasPenalty    Boolean        @default(false)
-  paidPrice     Int // 결제 금액
-  totalPrice    Int // 총 금액
-  discountPrice Int // 할인 금액
+  hasSurcharge  Boolean?       @default(false)
+  paidPrice     Int? // 결제 금액
+  totalPrice    Int? // 총 금액
+  discountPrice Int? // 할인 금액
   payments      PaymentModel[]
 
   createdAt DateTime  @default(now())
@@ -58,11 +66,10 @@ model LocationModel {
   latitude  Int
   longitude Int
 
-  terminatedPhoneLocationId String?
-  terminatedPhoneLocation   RideModel? @relation("TerminatedPhoneLocation")
-
-  terminatedKickboardLocationId String?
-  terminatedKickboardLocation   RideModel? @relation("TerminatedKickboardLocation")
+  startedPhoneLocation        RideModel[] @relation("StartedPhoneLocation")
+  startedKickboardLocation    RideModel[] @relation("StartedKickboardLocation")
+  terminatedPhoneLocation     RideModel[] @relation("TerminatedPhoneLocation")
+  terminatedKickboardLocation RideModel[] @relation("TerminatedKickboardLocation")
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -92,5 +99,5 @@ model PaymentModel {
 
 enum PaymentType {
   SERVICE
-  PENALTY
+  SURCHARGE
 }
