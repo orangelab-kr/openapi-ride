@@ -1,6 +1,8 @@
 import { InternalError, OPCODE, Wrapper, logger } from '../tools';
 import express, { Router } from 'express';
 
+import { PlatformMiddleware } from '../middlewares';
+import Ride from '../controllers/ride';
 import morgan from 'morgan';
 import os from 'os';
 
@@ -14,6 +16,19 @@ export default function getRouter(): Router {
   router.use(logging);
   router.use(express.json());
   router.use(express.urlencoded({ extended: true }));
+
+  router.post(
+    '/start',
+    PlatformMiddleware(),
+    Wrapper(async (req, res) => {
+      const { rideId } = await Ride.startRide(
+        req.loggined.accessKey.platform,
+        req.body
+      );
+
+      res.json({ opcode: OPCODE.SUCCESS, rideId });
+    })
+  );
 
   router.get(
     '/',

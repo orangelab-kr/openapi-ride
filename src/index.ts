@@ -1,7 +1,7 @@
-import Database from './tools/database';
 import dotenv from 'dotenv';
 import express from 'express';
 import getRouter from './routes';
+import Database from './tools/database';
 import logger from './tools/logger';
 
 if (process.env.NODE_ENV === 'dev') {
