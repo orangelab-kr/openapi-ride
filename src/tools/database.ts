@@ -22,7 +22,7 @@ export default class Database {
             case 'delete':
               params.action = 'update';
               break;
-            case 'delete':
+            case 'deleteMany':
               params.action = 'updateMany';
               break;
           }
