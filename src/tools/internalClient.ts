@@ -19,7 +19,7 @@ export default class InternalClient {
     email = 'system@hikick.kr'
   ): InternalDiscountClient {
     const client = new InternalDiscountClient({
-      secretKey: process.env.HIKICK_OPENAPI_FRANCHISE_KEY || '',
+      secretKey: process.env.HIKICK_OPENAPI_DISCOUNT_KEY || '',
       issuer: process.env.HIKICK_OPENAPI_ISSUER || '',
       permissions,
       email,
