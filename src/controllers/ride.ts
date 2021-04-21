@@ -1,7 +1,8 @@
-import { RideModel } from '.prisma/client';
 import { InsurancePermission, InternalPlatform } from 'openapi-internal-sdk';
 import { InternalClient, Joi } from '../tools';
+
 import Database from '../tools/database';
+import { RideModel } from '@prisma/client';
 
 const { prisma } = Database;
 
@@ -73,7 +74,8 @@ export default class Ride {
       const discountClient = InternalClient.getDiscount();
       await discountClient
         .getDiscountGroup(discountGroupId)
-        .then((discountGroup) => discountGroup.getDiscount(discountId));
+        .then((discountGroup) => discountGroup.getDiscount(discountId))
+        .then((discount) => discount.update({ usedAt: new Date() }));
     }
 
     const { insuranceId } = await insuranceClient.start({

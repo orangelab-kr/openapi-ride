@@ -2,6 +2,7 @@ import { InternalError, OPCODE, Wrapper, logger } from '../tools';
 import express, { Router } from 'express';
 
 import { PlatformMiddleware } from '../middlewares';
+import { Pricing } from '../controllers/pricing';
 import Ride from '../controllers/ride';
 import morgan from 'morgan';
 import os from 'os';
@@ -27,6 +28,15 @@ export default function getRouter(): Router {
       );
 
       res.json({ opcode: OPCODE.SUCCESS, rideId });
+    })
+  );
+
+  router.post(
+    '/pricing',
+    PlatformMiddleware(),
+    Wrapper(async (req, res) => {
+      const pricing = await Pricing.getPricing(req.body);
+      res.json({ opcode: OPCODE.SUCCESS, pricing });
     })
   );
 

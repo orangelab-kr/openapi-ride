@@ -2,8 +2,8 @@ import { Joi, OPCODE, logger } from '../../tools';
 import Wrapper, { Callback } from '../../tools/wrapper';
 
 import InternalError from '../../tools/error';
+import dayjs from 'dayjs';
 import jwt from 'jsonwebtoken';
-import moment from 'moment';
 
 export * from './permissions';
 export default function InternalMiddleware(): Callback {
@@ -40,8 +40,8 @@ export default function InternalMiddleware(): Callback {
       });
 
       const payload = await schema.validateAsync(data);
-      const iat = moment(payload.iat);
-      const exp = moment(payload.exp);
+      const iat = dayjs(payload.iat);
+      const exp = dayjs(payload.exp);
       const prs = parseInt(payload.prs, 36)
         .toString(2)
         .padStart(128, '0')
