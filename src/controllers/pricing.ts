@@ -44,8 +44,8 @@ export const DefaultPricingResult: PricingResult = {
 
 export class Pricing {
   public static async getPricing(props: {
-    discountGroupId?: string;
-    discountId?: string;
+    discountGroupId: string | null;
+    discountId: string | null;
     minutes: number;
     latitude: number;
     longitude: number;

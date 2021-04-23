@@ -49,8 +49,7 @@ model RideModel {
   terminatedKickboardLocationId String?
   terminatedKickboardLocation   LocationModel? @relation("TerminatedKickboardLocation", fields: [terminatedKickboardLocationId], references: [locationId])
 
-  hasSurcharge  Boolean?       @default(false)
-  paidPrice     Int? // 결제 금액
+  paidPrice     Int? // 결제 금액(환불 포함)
   totalPrice    Int? // 총 금액
   discountPrice Int? // 할인 금액
   payments      PaymentModel[]
@@ -63,8 +62,8 @@ model RideModel {
 model LocationModel {
   locationId String @id @default(uuid())
 
-  latitude  Int
-  longitude Int
+  latitude  Float
+  longitude Float
 
   startedPhoneLocation        RideModel[] @relation("StartedPhoneLocation")
   startedKickboardLocation    RideModel[] @relation("StartedKickboardLocation")

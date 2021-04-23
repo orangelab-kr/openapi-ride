@@ -1,8 +1,7 @@
+import { Prisma, RideModel, RideTerminatedType } from '@prisma/client';
 import { InsurancePermission, InternalPlatform } from 'openapi-internal-sdk';
-import { InternalClient, Joi } from '../tools';
-
+import { InternalClient, InternalError, Joi, OPCODE } from '../tools';
 import Database from '../tools/database';
-import { RideModel } from '@prisma/client';
 
 const { prisma } = Database;
 
@@ -66,6 +65,7 @@ export default class Ride {
     ]);
 
     const kickboard = await kickboardClient.getKickboard(kickboardCode);
+    const { gps } = await kickboard.getLatestStatus();
     await kickboard.setMaxSpeed(25);
     await kickboard.start();
 
@@ -88,6 +88,15 @@ export default class Ride {
       longitude,
     });
 
+    const startedPhoneLocation: Prisma.LocationModelCreateNestedOneWithoutStartedPhoneLocationInput = {
+      create: { latitude, longitude },
+    };
+
+    const startedKickboardLocation: Prisma.LocationModelCreateNestedOneWithoutStartedKickboardLocationInput = {
+      create: { latitude: gps.latitude, longitude: gps.longitude },
+    };
+
+    console.log(gps);
     const ride = await prisma.rideModel.create({
       data: {
         kickboardCode,
@@ -101,12 +110,127 @@ export default class Ride {
         franchiseId,
         regionId,
         insuranceId,
-        startedPhoneLocation: {
-          create: {
-            latitude,
-            longitude,
-          },
-        },
+        startedPhoneLocation,
+        startedKickboardLocation,
+      },
+    });
+
+    return ride;
+  }
+
+  public static async terminateRide(
+    ride: RideModel,
+    props: { latitude: number; longitude: number; returnedURL: string }
+  ): Promise<void> {
+    if (ride.terminatedAt) {
+      throw new InternalError('이미 종료된 라이드입니다.', OPCODE.ERROR);
+    }
+
+    const schema = Joi.object({
+      latitude: Joi.number().min(-90).max(90).required(),
+      longitude: Joi.number().min(-180).max(180).required(),
+      returnedURL: Joi.string().uri().optional(),
+    });
+
+    const {
+      latitude,
+      longitude,
+      returnedURL,
+    }: {
+      latitude: number;
+      longitude: number;
+      returnedURL: string;
+    } = await schema.validateAsync(props);
+    const { kickboardCode, discountGroupId, discountId, insuranceId } = ride;
+    const kickboardClient = InternalClient.getKickboard();
+    const insuranceClient = InternalClient.getInsurance([
+      InsurancePermission.INSURANCE_VIEW,
+      InsurancePermission.INSURANCE_END,
+    ]);
+
+    const kickboard = await kickboardClient.getKickboard(kickboardCode);
+    const { gps } = await kickboard.getLatestStatus();
+    await kickboard.lightOff();
+    await kickboard.stop();
+
+    if (discountGroupId && discountId) {
+      const discountClient = InternalClient.getDiscount();
+      await discountClient
+        .getDiscountGroup(discountGroupId)
+        .then((discountGroup) => discountGroup.getDiscount(discountId))
+        .then((discount) => discount.update({ usedAt: new Date() }));
+    }
+
+    const terminatedPhoneLocation = {
+      create: { latitude, longitude },
+    };
+
+    const terminatedKickboardLocation = {
+      create: { latitude: gps.latitude, longitude: gps.longitude },
+    };
+
+    if (insuranceId) {
+      await insuranceClient
+        .getInsurance(insuranceId)
+        .then((insurance) => insurance.end());
+    }
+
+    // const minutes = dayjs().diff(ride.startedAt, 'minutes');
+    // const {
+    //   standard,
+    //   perMinute,
+    //   surchrge,
+    //   price,
+    //   discount,
+    //   total,
+    // } = await Pricing.getPricing({
+    //   discountGroupId,
+    //   discountId,
+    //   minutes,
+    //   latitude,
+    //   longitude,
+    // });
+
+    const { rideId } = ride;
+    await prisma.rideModel.update({
+      where: { rideId },
+      data: {
+        returnedURL,
+        terminatedAt: new Date(),
+        terminatedType: RideTerminatedType.USER_REQUESTED,
+        terminatedPhoneLocation,
+        terminatedKickboardLocation,
+      },
+    });
+  }
+
+  public static async getRideOrThrow(
+    platform: InternalPlatform,
+    rideId: string
+  ): Promise<RideModel> {
+    const ride = await this.getRide(platform, rideId);
+    if (!ride) {
+      throw new InternalError(
+        '해당 라이드를 찾을 수 없습니다.',
+        OPCODE.NOT_FOUND
+      );
+    }
+
+    return ride;
+  }
+
+  public static async getRide(
+    platform: InternalPlatform,
+    rideId: string
+  ): Promise<RideModel | null> {
+    const { platformId } = platform;
+    const ride = await prisma.rideModel.findFirst({
+      where: { platformId, rideId },
+      include: {
+        startedPhoneLocation: true,
+        startedKickboardLocation: true,
+        terminatedPhoneLocation: true,
+        terminatedKickboardLocation: true,
       },
     });
 

@@ -1,11 +1,10 @@
-import { InternalError, OPCODE, Wrapper, logger } from '../tools';
 import express, { Router } from 'express';
-
-import { PlatformMiddleware } from '../middlewares';
-import { Pricing } from '../controllers/pricing';
-import Ride from '../controllers/ride';
 import morgan from 'morgan';
 import os from 'os';
+import { Pricing } from '../controllers/pricing';
+import Ride from '../controllers/ride';
+import { PlatformMiddleware, RideMiddleware } from '../middlewares';
+import { InternalError, logger, OPCODE, Wrapper } from '../tools';
 
 export default function getRouter(): Router {
   const router = Router();
@@ -19,7 +18,7 @@ export default function getRouter(): Router {
   router.use(express.urlencoded({ extended: true }));
 
   router.post(
-    '/start',
+    '/',
     PlatformMiddleware(),
     Wrapper(async (req, res) => {
       const { rideId } = await Ride.startRide(
@@ -28,6 +27,16 @@ export default function getRouter(): Router {
       );
 
       res.json({ opcode: OPCODE.SUCCESS, rideId });
+    })
+  );
+
+  router.delete(
+    '/:rideId',
+    PlatformMiddleware(),
+    RideMiddleware(),
+    Wrapper(async (req, res) => {
+      await Ride.terminateRide(req.ride, req.body);
+      res.json({ opcode: OPCODE.SUCCESS });
     })
   );
 
