@@ -1,3 +1,5 @@
+import { RideModel } from '.prisma/client';
+import dayjs from 'dayjs';
 import {
   DiscountPermission,
   InternalDiscountGroup,
@@ -43,12 +45,28 @@ export const DefaultPricingResult: PricingResult = {
 };
 
 export class Pricing {
+  public static async getPricingByRide(
+    ride: RideModel,
+    props: { latitude?: number; longitude?: number }
+  ): Promise<PricingResult> {
+    const { latitude, longitude } = props;
+    const { discountGroupId, discountId, startedAt } = ride;
+    const minutes = dayjs(startedAt).diff(dayjs(), 'minutes');
+    return this.getPricing({
+      latitude,
+      longitude,
+      minutes,
+      discountGroupId,
+      discountId,
+    });
+  }
+
   public static async getPricing(props: {
     discountGroupId: string | null;
     discountId: string | null;
     minutes: number;
-    latitude: number;
-    longitude: number;
+    latitude?: number;
+    longitude?: number;
   }): Promise<PricingResult> {
     const result: PricingResult = { ...DefaultPricingResult };
     result.isNightly = this.isNightly();
@@ -63,8 +81,8 @@ export class Pricing {
       latitude: Joi.number().min(-90).max(90).required(),
       longitude: Joi.number().min(-180).max(180).required(),
       minutes: Joi.number().required(),
-      discountGroupId: Joi.string().uuid().optional(),
-      discountId: Joi.string().uuid().optional(),
+      discountGroupId: Joi.string().allow(null).uuid().optional(),
+      discountId: Joi.string().allow(null).uuid().optional(),
     }).validateAsync(props);
     const location = await locationClient.getGeofenceByLocation({ lat, lng });
     const [pricing, profile] = await Promise.all([

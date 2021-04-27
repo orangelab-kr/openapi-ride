@@ -40,11 +40,12 @@ export default function getRouter(): Router {
     })
   );
 
-  router.post(
-    '/pricing',
+  router.get(
+    '/:rideId/pricing',
     PlatformMiddleware(),
+    RideMiddleware(),
     Wrapper(async (req, res) => {
-      const pricing = await Pricing.getPricing(req.body);
+      const pricing = await Pricing.getPricingByRide(req.ride, req.query);
       res.json({ opcode: OPCODE.SUCCESS, pricing });
     })
   );

@@ -1,5 +1,9 @@
 import { Prisma, RideModel, RideTerminatedType } from '@prisma/client';
-import { InsurancePermission, InternalPlatform } from 'openapi-internal-sdk';
+import {
+  InsurancePermission,
+  InternalKickboardMode,
+  InternalPlatform,
+} from 'openapi-internal-sdk';
 import { InternalClient, InternalError, Joi, OPCODE } from '../tools';
 import Database from '../tools/database';
 
@@ -65,6 +69,10 @@ export default class Ride {
     ]);
 
     const kickboard = await kickboardClient.getKickboard(kickboardCode);
+    if (kickboard.mode === InternalKickboardMode.READY) {
+      throw new InternalError('사용중인 킥보드입니다.', OPCODE.ERROR);
+    }
+
     const { gps } = await kickboard.getLatestStatus();
     await kickboard.setMaxSpeed(25);
     await kickboard.start();
@@ -96,7 +104,6 @@ export default class Ride {
       create: { latitude: gps.latitude, longitude: gps.longitude },
     };
 
-    console.log(gps);
     const ride = await prisma.rideModel.create({
       data: {
         kickboardCode,
