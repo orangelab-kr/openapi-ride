@@ -3,12 +3,29 @@ import {
   InsurancePermission,
   InternalKickboardMode,
   InternalPlatform,
+  WebhookPermission,
 } from 'openapi-internal-sdk';
-import { Prisma, RideModel, RideTerminatedType } from '@prisma/client';
+import {
+  PaymentType,
+  Prisma,
+  RideModel,
+  RideTerminatedType,
+} from '@prisma/client';
 
+import { Payment } from './payment';
 import { Pricing } from '..';
 
 const { prisma } = Database;
+const kickboardClient = InternalClient.getKickboard();
+const webhookClient = InternalClient.getWebhook([
+  WebhookPermission.REQUESTS_SEND,
+]);
+
+const insuranceClient = InternalClient.getInsurance([
+  InsurancePermission.INSURANCE_START,
+  InsurancePermission.INSURANCE_VIEW,
+  InsurancePermission.INSURANCE_END,
+]);
 
 export class Ride {
   public static async startRide(
@@ -43,7 +60,6 @@ export class Ride {
     });
 
     const {
-      kickboardCode,
       userId,
       realname,
       phone,
@@ -52,6 +68,7 @@ export class Ride {
       discountId,
       latitude,
       longitude,
+      kickboardCode: code,
     }: {
       kickboardCode: string;
       userId: string;
@@ -64,11 +81,7 @@ export class Ride {
       longitude: number;
     } = await schema.validateAsync(props);
     const { platformId } = platform;
-    const kickboardClient = InternalClient.getKickboard();
-    const insuranceClient = InternalClient.getInsurance([
-      InsurancePermission.INSURANCE_START,
-    ]);
-
+    const kickboardCode = code.toUpperCase();
     const kickboard = await kickboardClient.getKickboard(kickboardCode);
     if (kickboard.mode !== InternalKickboardMode.READY) {
       throw new InternalError('사용중인 킥보드입니다.', OPCODE.ERROR);
@@ -150,12 +163,6 @@ export class Ride {
       returnedURL: string;
     } = await schema.validateAsync(props);
     const { kickboardCode, discountGroupId, discountId, insuranceId } = ride;
-    const kickboardClient = InternalClient.getKickboard();
-    const insuranceClient = InternalClient.getInsurance([
-      InsurancePermission.INSURANCE_VIEW,
-      InsurancePermission.INSURANCE_END,
-    ]);
-
     const kickboard = await kickboardClient.getKickboard(kickboardCode);
     const { gps } = await kickboard.getLatestStatus();
     await kickboard.lightOff();
@@ -188,12 +195,26 @@ export class Ride {
       longitude,
     });
 
+    const servicePrice = pricing.standard.total + pricing.perMinute.total;
+    const surchargePrice = pricing.surcharge.total;
+    await Promise.all([
+      Payment.addPayment(ride, PaymentType.SERVICE, servicePrice),
+      Payment.addPayment(ride, PaymentType.SURCHARGE, surchargePrice),
+    ]);
+
     const { rideId } = ride;
     const terminatedAt = new Date();
     const terminatedType = RideTerminatedType.USER_REQUESTED;
     const receipt = Pricing.getReceiptToCreateInput(pricing);
-    await prisma.rideModel.update({
+    const updatedRide = await prisma.rideModel.update({
       where: { rideId },
+      include: {
+        startedPhoneLocation: true,
+        startedKickboardLocation: true,
+        terminatedPhoneLocation: true,
+        terminatedKickboardLocation: true,
+        receipt: true,
+      },
       data: {
         returnedURL,
         terminatedAt,
@@ -203,6 +224,8 @@ export class Ride {
         receipt,
       },
     });
+
+    await this.sendEndWebhook(updatedRide);
   }
 
   public static async getRideOrThrow(
@@ -218,6 +241,13 @@ export class Ride {
     }
 
     return ride;
+  }
+
+  public static async sendEndWebhook(ride: RideModel): Promise<void> {
+    await webhookClient.request(ride.platformId, {
+      type: 'rideEnd',
+      data: ride,
+    });
   }
 
   public static async getRide(

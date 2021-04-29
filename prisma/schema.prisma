@@ -124,11 +124,13 @@ model PaymentModel {
   paymentId   String  @id @default(uuid())
   description String?
 
+  platformId  String
   paymentType PaymentType
   amount      Int
 
-  rideId String
-  ride   RideModel @relation(fields: [rideId], references: [rideId])
+  rideId    String
+  ride      RideModel @relation(fields: [rideId], references: [rideId])
+  hasRefund Boolean   @default(false)
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
