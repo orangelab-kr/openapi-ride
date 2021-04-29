@@ -1,12 +1,19 @@
+import {
+  InternalError,
+  OPCODE,
+  PlatformMiddleware,
+  Pricing,
+  Ride,
+  RideMiddleware,
+  Wrapper,
+  logger,
+} from '..';
 import express, { Router } from 'express';
+
 import morgan from 'morgan';
 import os from 'os';
-import { Pricing } from '../controllers/pricing';
-import Ride from '../controllers/ride';
-import { PlatformMiddleware, RideMiddleware } from '../middlewares';
-import { InternalError, logger, OPCODE, Wrapper } from '../tools';
 
-export default function getRouter(): Router {
+export function getRouter(): Router {
   const router = Router();
   const hostname = os.hostname();
   const logging = morgan('common', {

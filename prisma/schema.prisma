@@ -50,8 +50,9 @@ model RideModel {
   terminatedKickboardLocation   LocationModel? @relation("TerminatedKickboardLocation", fields: [terminatedKickboardLocationId], references: [locationId])
 
   receiptId String?
-  receipt   ReceiptModel?   @relation(fields: [receiptId], references: [receiptId])
+  receipt   ReceiptModel?  @relation(fields: [receiptId], references: [receiptId])
   payments  PaymentModel[]
+  price     Int            @default(0)
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

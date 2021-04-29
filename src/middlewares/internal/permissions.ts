@@ -1,6 +1,5 @@
-import Wrapper, { Callback } from '../../tools/wrapper';
+import { Callback, InternalError, Wrapper } from '../..';
 
-import InternalError from '../../tools/error';
 import { OPCODE } from '../../tools';
 
 export enum PERMISSION {}

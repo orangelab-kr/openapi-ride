@@ -1,6 +1,12 @@
-import { Callback, InternalError, OPCODE, Wrapper, logger } from '../tools';
+import {
+  Callback,
+  InternalClient,
+  InternalError,
+  OPCODE,
+  Wrapper,
+  logger,
+} from '../tools';
 
-import InternalClient from '../tools/internalClient';
 import { PlatformPermission } from 'openapi-internal-sdk';
 
 export default function PlatformMiddleware(

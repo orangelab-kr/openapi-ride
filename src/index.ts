@@ -1,12 +1,11 @@
-import dotenv from 'dotenv';
-import express from 'express';
-import getRouter from './routes';
-import Database from './tools/database';
-import logger from './tools/logger';
+import { Database, getRouter, logger } from '.';
 
-if (process.env.NODE_ENV === 'dev') {
-  dotenv.config({ path: '.env.dev' });
-}
+import express from 'express';
+
+export * from './controllers';
+export * from './middlewares';
+export * from './tools';
+export * from './routes';
 
 async function main() {
   logger.info('[System] 시스템을 활성화하고 있습니다.');

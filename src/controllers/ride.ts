@@ -1,18 +1,16 @@
+import { Database, InternalClient, InternalError, Joi, OPCODE } from '../tools';
 import {
   InsurancePermission,
   InternalKickboardMode,
   InternalPlatform,
 } from 'openapi-internal-sdk';
-import { InternalClient, InternalError, Joi, OPCODE } from '../tools';
 import { Prisma, RideModel, RideTerminatedType } from '@prisma/client';
 
-import Database from '../tools/database';
-import { Pricing } from './pricing';
-import dayjs from 'dayjs';
+import { Pricing } from '..';
 
 const { prisma } = Database;
 
-export default class Ride {
+export class Ride {
   public static async startRide(
     platform: InternalPlatform,
     props: {

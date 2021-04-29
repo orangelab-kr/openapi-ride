@@ -150,8 +150,6 @@ const messages = {
   'number.unsafe': '{{#label}}(은)는 64비트 부동 소수점 수로 표현해야 합니다.',
 };
 
-const Joi = JoiLib.defaults((schema) =>
+export const Joi = JoiLib.defaults((schema) =>
   schema.options({ abortEarly: true, messages })
 );
-
-export default Joi;

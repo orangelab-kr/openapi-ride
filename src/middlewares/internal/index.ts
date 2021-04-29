@@ -1,7 +1,5 @@
-import { Joi, OPCODE, logger } from '../../tools';
-import Wrapper, { Callback } from '../../tools/wrapper';
+import { Callback, InternalError, Joi, OPCODE, Wrapper, logger } from '../..';
 
-import InternalError from '../../tools/error';
 import dayjs from 'dayjs';
 import jwt from 'jsonwebtoken';
 

@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 
-export default class Database {
+export class Database {
   public static prisma = new PrismaClient();
 
   public static initPrisma(): void {

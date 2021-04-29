@@ -1,5 +1,4 @@
-import Ride from '../controllers/ride';
-import { Callback, InternalError, OPCODE, Wrapper } from '../tools';
+import { Callback, InternalError, OPCODE, Ride, Wrapper } from '..';
 
 export default function RideMiddleware(): Callback {
   return Wrapper(async (req, res, next) => {

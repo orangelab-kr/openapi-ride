@@ -1,6 +1,6 @@
 import { OPCODE } from '.';
 
-export default class InternalError extends Error {
+export class InternalError extends Error {
   public name = 'InternalError';
 
   public constructor(
