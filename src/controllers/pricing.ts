@@ -1,5 +1,3 @@
-import { RideModel } from '.prisma/client';
-import dayjs from 'dayjs';
 import {
   DiscountPermission,
   InternalDiscountGroup,
@@ -8,33 +6,27 @@ import {
   LocationPermission,
 } from 'openapi-internal-sdk';
 import { InternalClient, Joi } from '../tools';
+import { Prisma, ReceiptModel, RideModel } from '.prisma/client';
+
+import dayjs from 'dayjs';
 
 const locationClient = InternalClient.getLocation([
   LocationPermission.GEOFENCES_LOCATION,
 ]);
+
+type ReceiptUnit = Prisma.ReceiptUnitModelCreateInput;
+type Receipt = Prisma.ReceiptModelCreateInput & {
+  standard: ReceiptUnit;
+  perMinute: ReceiptUnit;
+  surcharge: ReceiptUnit;
+};
 
 const discountClient = InternalClient.getDiscount([
   DiscountPermission.DISCOUNT_GROUP_VIEW,
   DiscountPermission.DISCOUNT_VIEW,
 ]);
 
-export interface PricingUnitResult {
-  price: number;
-  discount: number;
-  total: number;
-}
-
-export interface PricingResult {
-  standard: PricingUnitResult;
-  perMinute: PricingUnitResult;
-  surcharge: PricingUnitResult;
-  isNightly: boolean;
-  price: number;
-  discount: number;
-  total: number;
-}
-
-export const DefaultPricingResult: PricingResult = {
+export const DefaultPricingResult: Receipt = {
   standard: { price: 0, discount: 0, total: 0 },
   perMinute: { price: 0, discount: 0, total: 0 },
   surcharge: { price: 0, discount: 0, total: 0 },
@@ -48,7 +40,7 @@ export class Pricing {
   public static async getPricingByRide(
     ride: RideModel,
     props: { latitude?: number; longitude?: number }
-  ): Promise<PricingResult> {
+  ): Promise<Receipt> {
     const { latitude, longitude } = props;
     const { discountGroupId, discountId, startedAt } = ride;
     const minutes = dayjs(startedAt).diff(dayjs(), 'minutes');
@@ -61,15 +53,41 @@ export class Pricing {
     });
   }
 
+  public static getReceiptToCreateInput(
+    receipt: Receipt
+  ): Prisma.ReceiptModelUpdateOneWithoutRidesInput {
+    const input: Prisma.ReceiptModelUpdateOneWithoutRidesInput = {};
+    const {
+      isNightly,
+      price,
+      discount,
+      total,
+      standard,
+      perMinute,
+      surcharge,
+    } = receipt;
+    input.create = {
+      isNightly,
+      price,
+      discount,
+      total,
+      standard: { create: standard },
+      perMinute: { create: perMinute },
+      surcharge: { create: surcharge },
+    };
+
+    return input;
+  }
+
   public static async getPricing(props: {
     discountGroupId: string | null;
     discountId: string | null;
     minutes: number;
     latitude?: number;
     longitude?: number;
-  }): Promise<PricingResult> {
-    const result: PricingResult = { ...DefaultPricingResult };
-    result.isNightly = this.isNightly();
+  }): Promise<Receipt> {
+    const receipt: Receipt = { ...DefaultPricingResult };
+    receipt.isNightly = this.isNightly();
 
     const {
       latitude: lat,
@@ -96,47 +114,51 @@ export class Pricing {
       await discountGroup.getDiscount(discountId);
     }
 
-    result.standard = this.getStandardPrice({
+    receipt.standard = this.getStandardPrice({
       pricing,
       discountGroup,
-      result,
+      receipt,
     });
 
-    result.perMinute = this.getPerMinutePrice({
+    receipt.perMinute = this.getPerMinutePrice({
       minutes,
       pricing,
       discountGroup,
-      result,
+      receipt,
     });
 
-    result.surcharge = this.getSurchargePrice({
+    receipt.surcharge = this.getSurchargePrice({
       pricing,
       discountGroup,
-      result,
+      receipt,
       profile,
     });
 
-    result.price =
-      result.standard.price + result.perMinute.price + result.surcharge.price;
-    result.discount =
-      result.standard.discount +
-      result.perMinute.discount +
-      result.surcharge.discount;
-    result.total =
-      result.standard.total + result.perMinute.total + result.surcharge.total;
+    receipt.price =
+      receipt.standard.price +
+      receipt.perMinute.price +
+      receipt.surcharge.price;
+    receipt.discount =
+      receipt.standard.discount +
+      receipt.perMinute.discount +
+      receipt.surcharge.discount;
+    receipt.total =
+      receipt.standard.total +
+      receipt.perMinute.total +
+      receipt.surcharge.total;
 
-    return result;
+    return receipt;
   }
 
   public static getPerMinutePrice(props: {
     minutes: number;
     pricing: InternalLocationPricing;
     discountGroup?: InternalDiscountGroup;
-    result: PricingResult;
-  }): PricingUnitResult {
-    const unitResult = { ...DefaultPricingResult.perMinute };
-    const { minutes, pricing, discountGroup, result } = props;
-    const perMinutePrice = result.isNightly
+    receipt: Receipt;
+  }): ReceiptUnit {
+    const receiptUnit = { ...DefaultPricingResult.perMinute };
+    const { minutes, pricing, discountGroup, receipt } = props;
+    const perMinutePrice = receipt.isNightly
       ? pricing.perMinuteNightlyPrice
       : pricing.perMinuteStandardPrice;
 
@@ -145,92 +167,92 @@ export class Pricing {
     let removedMinute = minutes - pricing.standardTime;
     if (removedMinute <= 0) removedMinute = 0;
     if (discountMinute > removedMinute) discountMinute = removedMinute;
-    unitResult.price = removedMinute * perMinutePrice;
-    unitResult.discount = discountMinute * perMinutePrice;
+    receiptUnit.price = removedMinute * perMinutePrice;
+    receiptUnit.discount = discountMinute * perMinutePrice;
     if (discountGroup && discountGroup.isPerMinuteIncluded) {
       // 퍼센티지 할인
       if (discountGroup.ratioPriceDiscount) {
-        unitResult.discount =
-          unitResult.price * (discountGroup.ratioPriceDiscount / 100);
+        receiptUnit.discount =
+          receiptUnit.price * (discountGroup.ratioPriceDiscount / 100);
       }
 
       // 정적 할인
       if (discountGroup.staticPriceDiscount) {
-        unitResult.discount += discountGroup.staticPriceDiscount;
-        if (unitResult.discount > unitResult.price) {
-          unitResult.discount = unitResult.price;
+        receiptUnit.discount += discountGroup.staticPriceDiscount;
+        if (receiptUnit.discount > receiptUnit.price) {
+          receiptUnit.discount = receiptUnit.price;
         }
       }
     }
 
-    unitResult.total = unitResult.price - unitResult.discount;
-    return unitResult;
+    receiptUnit.total = receiptUnit.price - receiptUnit.discount;
+    return receiptUnit;
   }
 
   public static getStandardPrice(props: {
     pricing: InternalLocationPricing;
     discountGroup?: InternalDiscountGroup;
-    result: PricingResult;
-  }): PricingUnitResult {
-    const unitResult = { ...DefaultPricingResult.standard };
-    const { pricing, discountGroup, result } = props;
-    const standardPrice = result.isNightly
+    receipt: Receipt;
+  }): ReceiptUnit {
+    const receiptUnit = { ...DefaultPricingResult.standard };
+    const { pricing, discountGroup, receipt } = props;
+    const standardPrice = receipt.isNightly
       ? pricing.nightlyPrice
       : pricing.standardPrice;
 
-    unitResult.price = standardPrice;
+    receiptUnit.price = standardPrice;
     if (discountGroup && discountGroup.isStandardIncluded) {
       // 퍼센티지 할인
       if (discountGroup.ratioPriceDiscount) {
-        unitResult.discount =
-          unitResult.price * (discountGroup.ratioPriceDiscount / 100);
+        receiptUnit.discount =
+          receiptUnit.price * (discountGroup.ratioPriceDiscount / 100);
       }
 
       // 정적 할인
       if (discountGroup.staticPriceDiscount) {
-        unitResult.discount += discountGroup.staticPriceDiscount;
-        if (unitResult.discount > unitResult.price) {
-          unitResult.discount = unitResult.price;
+        receiptUnit.discount += discountGroup.staticPriceDiscount;
+        if (receiptUnit.discount > receiptUnit.price) {
+          receiptUnit.discount = receiptUnit.price;
         }
       }
     }
 
-    unitResult.total = unitResult.price - unitResult.discount;
-    return unitResult;
+    receiptUnit.total = receiptUnit.price - receiptUnit.discount;
+    return receiptUnit;
   }
 
   public static getSurchargePrice(props: {
     pricing: InternalLocationPricing;
     discountGroup?: InternalDiscountGroup;
-    result: PricingResult;
+    receipt: Receipt;
     profile: InternalLocationProfile;
-  }): PricingUnitResult {
-    const unitResult = { ...DefaultPricingResult.surcharge };
-    const { pricing, discountGroup, result, profile } = props;
-    if (!profile.hasSurcharge) return unitResult;
+  }): ReceiptUnit {
+    const receiptUnit = { ...DefaultPricingResult.surcharge };
+    const { pricing, discountGroup, receipt, profile } = props;
+    if (!profile.hasSurcharge) return receiptUnit;
 
-    unitResult.price = pricing.surchargePrice;
+    receiptUnit.price = pricing.surchargePrice;
     if (discountGroup && discountGroup.isSurchargeIncluded) {
       // 퍼센티지 할인
       if (discountGroup.ratioPriceDiscount) {
-        unitResult.discount =
-          unitResult.price * (discountGroup.ratioPriceDiscount / 100);
+        receiptUnit.discount =
+          receiptUnit.price * (discountGroup.ratioPriceDiscount / 100);
       }
 
       // 정적 할인
-      if (discountGroup.staticPriceDiscount && result.standard.total === 0) {
+      if (discountGroup.staticPriceDiscount && receipt.standard.total === 0) {
         const discountPrice =
-          discountGroup.staticPriceDiscount - result.standard.discount;
+          discountGroup.staticPriceDiscount - receipt.standard.discount;
 
-        unitResult.discount += discountPrice;
-        if (unitResult.discount > unitResult.price) {
-          unitResult.discount = unitResult.price;
+        receiptUnit.discount += discountPrice;
+        if (receiptUnit.discount > receiptUnit.price) {
+          receiptUnit.discount = receiptUnit.price;
         }
       }
     }
 
-    unitResult.total = unitResult.price - unitResult.discount;
-    return unitResult;
+    receiptUnit.total = receiptUnit.price - receiptUnit.discount;
+    return receiptUnit;
   }
 
   public static isNightly(): boolean {

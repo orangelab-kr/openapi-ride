@@ -8,9 +8,11 @@ import {
   InternalKickboardClient,
   InternalLocationClient,
   InternalPlatformClient,
+  InternalWebhookClient,
   KickboardPermission,
   LocationPermission,
   PlatformPermission,
+  WebhookPermission,
 } from 'openapi-internal-sdk';
 
 export default class InternalClient {
@@ -20,6 +22,20 @@ export default class InternalClient {
   ): InternalDiscountClient {
     const client = new InternalDiscountClient({
       secretKey: process.env.HIKICK_OPENAPI_DISCOUNT_KEY || '',
+      issuer: process.env.HIKICK_OPENAPI_ISSUER || '',
+      permissions,
+      email,
+    });
+
+    return client;
+  }
+
+  public static getWebhook(
+    permissions?: WebhookPermission[],
+    email = 'system@hikick.kr'
+  ): InternalWebhookClient {
+    const client = new InternalWebhookClient({
+      secretKey: process.env.HIKICK_OPENAPI_WEBHOOK_KEY || '',
       issuer: process.env.HIKICK_OPENAPI_ISSUER || '',
       permissions,
       email,

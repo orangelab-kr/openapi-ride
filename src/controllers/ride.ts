@@ -1,11 +1,14 @@
-import { Prisma, RideModel, RideTerminatedType } from '@prisma/client';
 import {
   InsurancePermission,
   InternalKickboardMode,
   InternalPlatform,
 } from 'openapi-internal-sdk';
 import { InternalClient, InternalError, Joi, OPCODE } from '../tools';
+import { Prisma, RideModel, RideTerminatedType } from '@prisma/client';
+
 import Database from '../tools/database';
+import { Pricing } from './pricing';
+import dayjs from 'dayjs';
 
 const { prisma } = Database;
 
@@ -69,7 +72,7 @@ export default class Ride {
     ]);
 
     const kickboard = await kickboardClient.getKickboard(kickboardCode);
-    if (kickboard.mode === InternalKickboardMode.READY) {
+    if (kickboard.mode !== InternalKickboardMode.READY) {
       throw new InternalError('사용중인 킥보드입니다.', OPCODE.ERROR);
     }
 
@@ -182,31 +185,24 @@ export default class Ride {
         .then((insurance) => insurance.end());
     }
 
-    // const minutes = dayjs().diff(ride.startedAt, 'minutes');
-    // const {
-    //   standard,
-    //   perMinute,
-    //   surchrge,
-    //   price,
-    //   discount,
-    //   total,
-    // } = await Pricing.getPricing({
-    //   discountGroupId,
-    //   discountId,
-    //   minutes,
-    //   latitude,
-    //   longitude,
-    // });
+    const pricing = await Pricing.getPricingByRide(ride, {
+      latitude,
+      longitude,
+    });
 
     const { rideId } = ride;
+    const terminatedAt = new Date();
+    const terminatedType = RideTerminatedType.USER_REQUESTED;
+    const receipt = Pricing.getReceiptToCreateInput(pricing);
     await prisma.rideModel.update({
       where: { rideId },
       data: {
         returnedURL,
-        terminatedAt: new Date(),
-        terminatedType: RideTerminatedType.USER_REQUESTED,
+        terminatedAt,
+        terminatedType,
         terminatedPhoneLocation,
         terminatedKickboardLocation,
+        receipt,
       },
     });
   }
@@ -238,6 +234,7 @@ export default class Ride {
         startedKickboardLocation: true,
         terminatedPhoneLocation: true,
         terminatedKickboardLocation: true,
+        receipt: true,
       },
     });
 

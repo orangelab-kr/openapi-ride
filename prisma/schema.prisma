@@ -49,10 +49,48 @@ model RideModel {
   terminatedKickboardLocationId String?
   terminatedKickboardLocation   LocationModel? @relation("TerminatedKickboardLocation", fields: [terminatedKickboardLocationId], references: [locationId])
 
-  paidPrice     Int? // 결제 금액(환불 포함)
-  totalPrice    Int? // 총 금액
-  discountPrice Int? // 할인 금액
-  payments      PaymentModel[]
+  receiptId String?
+  receipt   ReceiptModel?   @relation(fields: [receiptId], references: [receiptId])
+  payments  PaymentModel[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model ReceiptModel {
+  receiptId String @id @default(uuid())
+
+  standardId String
+  standard   ReceiptUnitModel @relation("ReceiptUnitStandard", fields: [standardId], references: [receiptUnitId])
+
+  perMinuteId String
+  perMinute   ReceiptUnitModel @relation("ReceiptUnitPerMinute", fields: [perMinuteId], references: [receiptUnitId])
+
+  surchargeId String
+  surcharge   ReceiptUnitModel @relation("ReceiptUnitSurcharge", fields: [surchargeId], references: [receiptUnitId])
+
+  rides     RideModel[]
+  isNightly Boolean
+  price     Int
+  discount  Int
+  total     Int
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model ReceiptUnitModel {
+  receiptUnitId String @id @default(uuid())
+
+  price    Int
+  discount Int
+  total    Int
+
+  standard  ReceiptModel[] @relation("ReceiptUnitStandard")
+  perMinute ReceiptModel[] @relation("ReceiptUnitPerMinute")
+  surcharge ReceiptModel[] @relation("ReceiptUnitSurcharge")
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
