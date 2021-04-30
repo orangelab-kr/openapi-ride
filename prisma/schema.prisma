@@ -130,7 +130,7 @@ model PaymentModel {
 
   rideId    String
   ride      RideModel @relation(fields: [rideId], references: [rideId])
-  hasRefund Boolean   @default(false)
+  refundedAt DateTime?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

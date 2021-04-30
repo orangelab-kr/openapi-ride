@@ -13,7 +13,7 @@ export class Payment {
   public static async refreshPrice(ride: RideModel): Promise<void> {
     const { rideId } = ride;
     const payments = await prisma.paymentModel.findMany({
-      where: { rideId, hasRefund: false },
+      where: { rideId, refundedAt: null },
       orderBy: { createdAt: 'asc' },
       select: { amount: true },
     });
@@ -35,21 +35,38 @@ export class Payment {
     });
 
     await Promise.all([
-      Payment.sendPayment(payment),
+      Payment.sendPaymentWebhook(payment),
       Payment.refreshPrice(ride),
     ]);
 
     return payment;
   }
 
-  public static async sendPayment(payment: PaymentModel): Promise<void> {
+  public static async refundPayment(
+    ride: RideModel,
+    payment: PaymentModel
+  ): Promise<void> {
+    if (payment.refundedAt !== null) return;
+    const { paymentId } = payment;
+    payment = await prisma.paymentModel.update({
+      where: { paymentId },
+      data: { refundedAt: new Date() },
+    });
+
+    await Promise.all([
+      Payment.sendRefundWebhook(payment),
+      Payment.refreshPrice(ride),
+    ]);
+  }
+
+  public static async sendPaymentWebhook(payment: PaymentModel): Promise<void> {
     await webhookClient.request(payment.platformId, {
       type: 'payment',
       data: payment,
     });
   }
 
-  public static async refundPayment(payment: PaymentModel): Promise<void> {
+  public static async sendRefundWebhook(payment: PaymentModel): Promise<void> {
     await webhookClient.request(payment.platformId, {
       type: 'refund',
       data: payment,
