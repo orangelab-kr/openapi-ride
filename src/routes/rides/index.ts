@@ -3,14 +3,17 @@ import { OPCODE, Pricing, Ride, RideMiddleware, Wrapper } from '../..';
 import { Router } from 'express';
 import { getRidesLightsRouter } from '.';
 import { getRidesLockRouter } from './lock';
+import { getRidesPaymentsRouter } from './payments';
 
 export * from './lights';
 export * from './lock';
+export * from './payments';
 
 export function getRidesRouter(): Router {
   const router = Router();
   router.use('/:rideId/lights', RideMiddleware(), getRidesLightsRouter());
   router.use('/:rideId/lock', RideMiddleware(), getRidesLockRouter());
+  router.use('/:rideId/payments', RideMiddleware(), getRidesPaymentsRouter());
 
   router.post(
     '/',
@@ -21,6 +24,15 @@ export function getRidesRouter(): Router {
       );
 
       res.json({ opcode: OPCODE.SUCCESS, rideId });
+    })
+  );
+
+  router.get(
+    '/:rideId',
+    RideMiddleware(),
+    Wrapper(async (req, res) => {
+      const { ride } = req;
+      res.json({ opcode: OPCODE.SUCCESS, ride });
     })
   );
 

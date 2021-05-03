@@ -1,7 +1,6 @@
-import { Database, InternalClient } from '../tools';
+import { Database, InternalClient, Joi } from '../tools';
+import { InternalError, OPCODE, WebhookPermission } from 'openapi-internal-sdk';
 import { PaymentModel, PaymentType, RideModel } from '.prisma/client';
-
-import { WebhookPermission } from 'openapi-internal-sdk';
 
 const { prisma } = Database;
 
@@ -23,15 +22,36 @@ export class Payment {
     await prisma.rideModel.update({ where: { rideId }, data: { price } });
   }
 
+  public static async getPayments(ride: RideModel): Promise<PaymentModel[]> {
+    const { rideId } = ride;
+    const payments = await prisma.paymentModel.findMany({
+      where: { rideId },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    return payments;
+  }
+
   public static async addPayment(
     ride: RideModel,
-    paymentType: PaymentType,
-    amount: number
+    props: { paymentType: PaymentType; amount: number; description?: string }
   ): Promise<PaymentModel | undefined> {
+    const schema = Joi.object({
+      paymentType: Joi.string()
+        .valid(...Object.keys(PaymentType))
+        .required(),
+      amount: Joi.number().required(),
+      description: Joi.string().optional(),
+    });
+
+    const { paymentType, amount, description } = await schema.validateAsync(
+      props
+    );
+
     if (amount <= 0) return;
     const { rideId, platformId } = ride;
     const payment = await prisma.paymentModel.create({
-      data: { platformId, rideId, paymentType, amount },
+      data: { platformId, rideId, paymentType, amount, description },
     });
 
     await Payment.sendPaymentWebhook(payment);
@@ -66,5 +86,32 @@ export class Payment {
       type: 'refund',
       data: payment,
     });
+  }
+
+  public static async getPaymentOrThrow(
+    ride: RideModel,
+    paymentId: string
+  ): Promise<PaymentModel> {
+    const payment = await this.getPayment(ride, paymentId);
+    if (!payment) {
+      throw new InternalError(
+        '해당 결제 내역을 찾을 수 없습니다.',
+        OPCODE.NOT_FOUND
+      );
+    }
+
+    return payment;
+  }
+
+  public static async getPayment(
+    ride: RideModel,
+    paymentId: string
+  ): Promise<PaymentModel | null> {
+    const { rideId } = ride;
+    const payment = await prisma.paymentModel.findFirst({
+      where: { rideId, paymentId },
+    });
+
+    return payment;
   }
 }

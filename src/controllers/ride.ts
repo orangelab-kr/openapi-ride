@@ -204,8 +204,15 @@ export class Ride {
 
     const servicePrice = pricing.standard.total + pricing.perMinute.total;
     const surchargePrice = pricing.surcharge.total;
-    await Payment.addPayment(ride, PaymentType.SERVICE, servicePrice);
-    await Payment.addPayment(ride, PaymentType.SURCHARGE, surchargePrice);
+    await Payment.addPayment(ride, {
+      paymentType: PaymentType.SERVICE,
+      amount: servicePrice,
+    });
+
+    await Payment.addPayment(ride, {
+      paymentType: PaymentType.SURCHARGE,
+      amount: surchargePrice,
+    });
 
     const { rideId } = ride;
     const terminatedAt = new Date();
