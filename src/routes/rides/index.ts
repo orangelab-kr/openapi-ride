@@ -1,9 +1,16 @@
-import { OPCODE, Pricing, Ride, RideMiddleware, Wrapper } from '..';
+import { OPCODE, Pricing, Ride, RideMiddleware, Wrapper } from '../..';
 
 import { Router } from 'express';
+import { getRidesLightsRouter } from '.';
+import { getRidesLockRouter } from './lock';
+
+export * from './lights';
+export * from './lock';
 
 export function getRidesRouter(): Router {
   const router = Router();
+  router.use('/:rideId/lights', RideMiddleware(), getRidesLightsRouter());
+  router.use('/:rideId/lock', RideMiddleware(), getRidesLockRouter());
 
   router.post(
     '/',

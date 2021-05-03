@@ -289,4 +289,30 @@ export class Ride {
       createdAt,
     }));
   }
+
+  public static async setLights(
+    ride: RideModel,
+    enabled: boolean
+  ): Promise<void> {
+    if (ride.terminatedAt) {
+      throw new InternalError('이미 종료된 라이드입니다.', OPCODE.ERROR);
+    }
+
+    const kickboard = await kickboardClient.getKickboard(ride.kickboardCode);
+    if (enabled) await kickboard.lightOn({ mode: 0, seconds: 0 });
+    else kickboard.lightOff();
+  }
+
+  public static async setLock(
+    ride: RideModel,
+    enabled: boolean
+  ): Promise<void> {
+    if (ride.terminatedAt) {
+      throw new InternalError('이미 종료된 라이드입니다.', OPCODE.ERROR);
+    }
+
+    const kickboard = await kickboardClient.getKickboard(ride.kickboardCode);
+    if (enabled) await kickboard.lock();
+    else kickboard.unlock();
+  }
 }
