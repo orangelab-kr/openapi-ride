@@ -27,6 +27,13 @@ const insuranceClient = InternalClient.getInsurance([
   InsurancePermission.INSURANCE_END,
 ]);
 
+interface RideTimeline {
+  latitude: number;
+  longitude: number;
+  battery: number;
+  createdAt: Date;
+}
+
 export class Ride {
   public static async startRide(
     platform: InternalPlatform,
@@ -267,5 +274,21 @@ export class Ride {
     });
 
     return ride;
+  }
+
+  public static async getTimeline(ride: RideModel): Promise<RideTimeline[]> {
+    const endedAt = ride.terminatedAt || new Date();
+    const timeline = await kickboardClient
+      .getKickboard(ride.kickboardCode)
+      .then((kickboard) =>
+        kickboard.getLatestStatusTimeline(ride.startedAt, endedAt)
+      );
+
+    return timeline.map(({ gps, power, createdAt }) => ({
+      latitude: gps.latitude,
+      longitude: gps.longitude,
+      battery: power.scooter.battery,
+      createdAt,
+    }));
   }
 }

@@ -1,17 +1,12 @@
-import {
-  InternalError,
-  OPCODE,
-  PlatformMiddleware,
-  Pricing,
-  Ride,
-  RideMiddleware,
-  Wrapper,
-  logger,
-} from '..';
+import { InternalError, OPCODE, Wrapper, logger } from '..';
 import express, { Router } from 'express';
 
+import { PlatformMiddleware } from '../middlewares';
+import { getRidesRouter } from './rides';
 import morgan from 'morgan';
 import os from 'os';
+
+export * from './rides';
 
 export function getRouter(): Router {
   const router = Router();
@@ -23,40 +18,7 @@ export function getRouter(): Router {
   router.use(logging);
   router.use(express.json());
   router.use(express.urlencoded({ extended: true }));
-
-  router.post(
-    '/',
-    PlatformMiddleware(),
-    Wrapper(async (req, res) => {
-      const { rideId } = await Ride.startRide(
-        req.loggined.accessKey.platform,
-        req.body
-      );
-
-      res.json({ opcode: OPCODE.SUCCESS, rideId });
-    })
-  );
-
-  router.delete(
-    '/:rideId',
-    PlatformMiddleware(),
-    RideMiddleware(),
-    Wrapper(async (req, res) => {
-      await Ride.terminateRide(req.ride, req.body);
-      res.json({ opcode: OPCODE.SUCCESS });
-    })
-  );
-
-  router.get(
-    '/:rideId/pricing',
-    PlatformMiddleware(),
-    RideMiddleware(),
-    Wrapper(async (req, res) => {
-      const pricing = await Pricing.getPricingByRide(req.ride, req.query);
-      res.json({ opcode: OPCODE.SUCCESS, pricing });
-    })
-  );
-
+  router.use('/rides', PlatformMiddleware(), getRidesRouter());
   router.get(
     '/',
     Wrapper(async (_req, res) => {
