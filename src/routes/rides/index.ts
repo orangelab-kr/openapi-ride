@@ -15,6 +15,16 @@ export function getRidesRouter(): Router {
   router.use('/:rideId/lock', RideMiddleware(), getRidesLockRouter());
   router.use('/:rideId/payments', RideMiddleware(), getRidesPaymentsRouter());
 
+  router.get(
+    '/',
+    Wrapper(async (req, res) => {
+      const { query } = req;
+      query.platformId = req.loggined.accessKey.platform.platformId;
+      const { total, rides } = await Ride.getRides(query);
+      res.json({ opcode: OPCODE.SUCCESS, rides, total });
+    })
+  );
+
   router.post(
     '/',
     Wrapper(async (req, res) => {

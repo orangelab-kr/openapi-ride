@@ -8,7 +8,7 @@ export function getRidesPaymentsRouter(): Router {
   router.get(
     '/',
     Wrapper(async (req, res) => {
-      const payments = await Payment.getPayments(req.ride);
+      const payments = await Payment.getPaymentsByRide(req.ride);
       res.json({ opcode: OPCODE.SUCCESS, payments });
     })
   );

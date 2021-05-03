@@ -121,15 +121,16 @@ enum RideTerminatedType {
 }
 
 model PaymentModel {
-  paymentId   String  @id @default(uuid())
-  description String?
+  paymentId   String @id @default(uuid())
+  description String @default("")
 
   platformId  String
+  franchiseId String
   paymentType PaymentType
   amount      Int
 
-  rideId    String
-  ride      RideModel @relation(fields: [rideId], references: [rideId])
+  rideId     String
+  ride       RideModel @relation(fields: [rideId], references: [rideId])
   refundedAt DateTime?
 
   createdAt DateTime  @default(now())

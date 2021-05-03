@@ -1,6 +1,7 @@
 import { InternalError, OPCODE, Wrapper, logger } from '..';
 import express, { Router } from 'express';
 
+import { Payment } from '../controllers';
 import { PlatformMiddleware } from '../middlewares';
 import { getRidesRouter } from './rides';
 import morgan from 'morgan';
@@ -29,6 +30,17 @@ export function getRouter(): Router {
         version: process.env.npm_package_version,
         cluster: hostname,
       });
+    })
+  );
+
+  router.get(
+    '/payments',
+    PlatformMiddleware(),
+    Wrapper(async (req, res) => {
+      const { query } = req;
+      query.platformId = req.loggined.accessKey.platform.platformId;
+      const { payments, total } = await Payment.getPayments(query);
+      res.json({ opcode: OPCODE.SUCCESS, payments, total });
     })
   );
 

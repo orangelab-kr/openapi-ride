@@ -35,6 +35,94 @@ interface RideTimeline {
 }
 
 export class Ride {
+  public static async getRides(props: {
+    take?: number;
+    skip?: number;
+    search?: string;
+    platformId?: string;
+    franchiseId?: string;
+    regionId?: string;
+    discountGroupId?: string;
+    terminatedType?: RideTerminatedType;
+    startedAt?: Date;
+    endedAt?: Date;
+    orderByField?:
+      | 'price'
+      | 'startedAt'
+      | 'terminatedAt'
+      | 'createdAt'
+      | 'updatedAt';
+    orderBySort?: 'asc' | 'desc';
+  }): Promise<{ rides: RideModel[]; total: number }> {
+    const schema = Joi.object({
+      take: Joi.number().default(10).optional(),
+      skip: Joi.number().default(0).optional(),
+      search: Joi.string().allow('').default('').optional(),
+      platformId: Joi.string().uuid().optional(),
+      franchiseId: Joi.string().uuid().optional(),
+      regionId: Joi.string().uuid().optional(),
+      discountGroupId: Joi.string().uuid().optional(),
+      terminatedType: Joi.string()
+        .valid(...Object.keys(RideTerminatedType))
+        .optional(),
+      startedAt: Joi.date().default(new Date(0)).optional(),
+      endedAt: Joi.date().default(new Date()).optional(),
+      orderByField: Joi.string()
+        .valid('price', 'startedAt', 'terminatedAt', 'createdAt', 'updatedAt')
+        .default('startedAt')
+        .optional(),
+      orderBySort: Joi.string().valid('asc', 'desc').default('desc').optional(),
+    });
+
+    const {
+      take,
+      skip,
+      search,
+      platformId,
+      franchiseId,
+      regionId,
+      discountGroupId,
+      terminatedType,
+      startedAt,
+      endedAt,
+      orderByField,
+      orderBySort,
+    } = await schema.validateAsync(props);
+    const orderBy = { [orderByField]: orderBySort };
+    const where: Prisma.RideModelWhereInput = {
+      startedAt: { gte: startedAt, lte: endedAt },
+      OR: [
+        { rideId: search },
+        { kickboardCode: search },
+        { insuranceId: search },
+        { discountId: search },
+        { franchiseId: search },
+        { platformId: search },
+        { userId: search },
+        { realname: { contains: search } },
+        { phone: { contains: search } },
+        { receiptId: search },
+      ],
+    };
+
+    if (platformId) where.platformId = platformId;
+    if (franchiseId) where.franchiseId = franchiseId;
+    if (regionId) where.regionId = regionId;
+    if (discountGroupId) where.discountGroupId = discountGroupId;
+    if (terminatedType) where.terminatedType = terminatedType;
+    const [total, rides] = await prisma.$transaction([
+      prisma.rideModel.count({ where }),
+      prisma.rideModel.findMany({
+        take,
+        skip,
+        where,
+        orderBy,
+      }),
+    ]);
+
+    return { rides, total };
+  }
+
   public static async startRide(
     platform: InternalPlatform,
     props: {
