@@ -1,6 +1,6 @@
 import { Callback, InternalError, OPCODE, Ride, Wrapper } from '..';
 
-export default function RideMiddleware(): Callback {
+export function RideMiddleware(): Callback {
   return Wrapper(async (req, res, next) => {
     const { rideId } = req.params;
     const { accessKey } = req.loggined;

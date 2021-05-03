@@ -4,9 +4,7 @@ import { OPCODE } from '../../tools';
 
 export enum PERMISSION {}
 
-export default function InternalPermissionMiddleware(
-  permission: PERMISSION
-): Callback {
+export function InternalPermissionMiddleware(permission: PERMISSION): Callback {
   return Wrapper(async (req, res, next) => {
     if (!req.internal.prs[permission]) {
       throw new InternalError(

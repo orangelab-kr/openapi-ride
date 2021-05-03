@@ -1,5 +1,5 @@
 export * from './internal';
-export { default as InternalMiddleware } from './internal';
-export { default as PlatformMiddleware } from './platform';
-export { default as RideMiddleware } from './ride';
+export * from './internal';
+export * from './platform';
+export * from './ride';
 export * from './payment';

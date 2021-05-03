@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import jwt from 'jsonwebtoken';
 
 export * from './permissions';
-export default function InternalMiddleware(): Callback {
+export function InternalMiddleware(): Callback {
   return Wrapper(async (req, res, next) => {
     const { headers, query } = req;
     const token = headers.authorization

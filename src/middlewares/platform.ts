@@ -9,7 +9,7 @@ import {
 
 import { PlatformPermission } from 'openapi-internal-sdk';
 
-export default function PlatformMiddleware(
+export function PlatformMiddleware(
   permissionIds: string[] = []
 ): Callback {
   const platformClient = InternalClient.getPlatform([
