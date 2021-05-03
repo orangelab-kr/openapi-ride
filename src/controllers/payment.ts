@@ -34,11 +34,8 @@ export class Payment {
       data: { platformId, rideId, paymentType, amount },
     });
 
-    await Promise.all([
-      Payment.sendPaymentWebhook(payment),
-      Payment.refreshPrice(ride),
-    ]);
-
+    await Payment.sendPaymentWebhook(payment);
+    await Payment.refreshPrice(ride);
     return payment;
   }
 
@@ -53,10 +50,8 @@ export class Payment {
       data: { refundedAt: new Date() },
     });
 
-    await Promise.all([
-      Payment.sendRefundWebhook(payment),
-      Payment.refreshPrice(ride),
-    ]);
+    await Payment.sendRefundWebhook(payment);
+    await Payment.refreshPrice(ride);
   }
 
   public static async sendPaymentWebhook(payment: PaymentModel): Promise<void> {

@@ -204,10 +204,8 @@ export class Ride {
 
     const servicePrice = pricing.standard.total + pricing.perMinute.total;
     const surchargePrice = pricing.surcharge.total;
-    await Promise.all([
-      Payment.addPayment(ride, PaymentType.SERVICE, servicePrice),
-      Payment.addPayment(ride, PaymentType.SURCHARGE, surchargePrice),
-    ]);
+    await Payment.addPayment(ride, PaymentType.SERVICE, servicePrice);
+    await Payment.addPayment(ride, PaymentType.SURCHARGE, surchargePrice);
 
     const { rideId } = ride;
     const terminatedAt = new Date();
