@@ -37,6 +37,15 @@ export function getRidesRouter(): Router {
     })
   );
 
+  router.post(
+    '/:rideId/photo',
+    RideMiddleware(),
+    Wrapper(async (req, res) => {
+      await Ride.uploadRidePhoto(req.ride, req.body);
+      res.json({ opcode: OPCODE.SUCCESS });
+    })
+  );
+
   router.get(
     '/:rideId',
     RideMiddleware(),

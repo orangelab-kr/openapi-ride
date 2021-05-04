@@ -14,6 +14,7 @@ import {
 
 import { Payment } from './payment';
 import { Pricing } from '..';
+import dayjs from 'dayjs';
 
 const { prisma } = Database;
 const kickboardClient = InternalClient.getKickboard();
@@ -185,6 +186,7 @@ export class Ride {
     const { gps } = await kickboard.getLatestStatus();
     await kickboard.setMaxSpeed(25);
     await kickboard.start();
+    await kickboard.setPhoto(null);
 
     const { franchiseId, regionId } = kickboard;
     if (discountGroupId && discountId) {
@@ -234,9 +236,64 @@ export class Ride {
     return ride;
   }
 
+  public static async uploadRidePhoto(
+    ride: RideModel,
+    props: { photo: string }
+  ): Promise<void> {
+    const schema = Joi.object({
+      photo: Joi.string().uri().optional(),
+    });
+
+    const { photo } = await schema.validateAsync(props);
+    const { kickboardCode, terminatedAt } = ride;
+    if (!terminatedAt) {
+      throw new InternalError(
+        '반납 사진은 반납 후에 업로드할 수 있습니다.',
+        OPCODE.ERROR
+      );
+    }
+
+    if (dayjs(terminatedAt).add(30, 'minutes').isBefore(dayjs())) {
+      throw new InternalError(
+        '반납 사진은 반납 후 30분 이내로만 업로드 가능합니다.',
+        OPCODE.EXCESS_LIMITS
+      );
+    }
+
+    if (ride.photo) {
+      throw new InternalError(
+        '이미 반납 사진을 업로드했습니다.',
+        OPCODE.ALREADY_EXISTS
+      );
+    }
+
+    const { rideId } = ride;
+    await prisma.rideModel.update({
+      where: { rideId },
+      data: { photo },
+    });
+
+    const isLastRide = await this.checkIsLastRide(ride);
+    if (!isLastRide) return;
+    await kickboardClient
+      .getKickboard(kickboardCode)
+      .then((kickboard) => kickboard.setPhoto(photo));
+  }
+
+  public static async checkIsLastRide(ride: RideModel): Promise<boolean> {
+    const { rideId, kickboardCode } = await ride;
+    const lastRide = await prisma.rideModel.findFirst({
+      where: { kickboardCode },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (!lastRide) return false;
+    return rideId === lastRide.rideId;
+  }
+
   public static async terminateRide(
     ride: RideModel,
-    props: { latitude: number; longitude: number; returnedURL: string }
+    props: { latitude: number; longitude: number; photo: string }
   ): Promise<void> {
     if (ride.terminatedAt) {
       throw new InternalError('이미 종료된 라이드입니다.', OPCODE.ERROR);
@@ -245,17 +302,14 @@ export class Ride {
     const schema = Joi.object({
       latitude: Joi.number().min(-90).max(90).required(),
       longitude: Joi.number().min(-180).max(180).required(),
-      returnedURL: Joi.string().uri().optional(),
     });
 
     const {
       latitude,
       longitude,
-      returnedURL,
     }: {
       latitude: number;
       longitude: number;
-      returnedURL: string;
     } = await schema.validateAsync(props);
     const { kickboardCode, discountGroupId, discountId, insuranceId } = ride;
     const kickboard = await kickboardClient.getKickboard(kickboardCode);
@@ -316,7 +370,6 @@ export class Ride {
         receipt: true,
       },
       data: {
-        returnedURL,
         terminatedAt,
         terminatedType,
         terminatedPhoneLocation,

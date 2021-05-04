@@ -28,7 +28,7 @@ model RideModel {
   birthday DateTime
 
   // 반납 사진
-  returnedURL String?
+  photo String?
 
   // 시작
   startedAt DateTime @default(now())
