@@ -1,4 +1,4 @@
-import { PaymentModel, RideModel } from '.prisma/client';
+import { PaymentModel, RideModel } from '@prisma/client';
 import 'express';
 import {
   InternalPlatform,

@@ -1,6 +1,6 @@
 import { Database, InternalClient, Joi } from '../tools';
 import { InternalError, OPCODE, WebhookPermission } from 'openapi-internal-sdk';
-import { PaymentModel, PaymentType, Prisma, RideModel } from '.prisma/client';
+import { PaymentModel, PaymentType, Prisma, RideModel } from '@prisma/client';
 
 const { prisma } = Database;
 

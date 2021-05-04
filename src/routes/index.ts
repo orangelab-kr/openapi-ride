@@ -3,6 +3,7 @@ import express, { Router } from 'express';
 
 import { Payment } from '../controllers';
 import { PlatformMiddleware } from '../middlewares';
+import cors from 'cors';
 import { getRidesRouter } from './rides';
 import morgan from 'morgan';
 import os from 'os';
@@ -16,6 +17,7 @@ export function getRouter(): Router {
     stream: { write: (str: string) => logger.info(`${str.trim()}`) },
   });
 
+  router.use(cors());
   router.use(logging);
   router.use(express.json());
   router.use(express.urlencoded({ extended: true }));

@@ -6,7 +6,7 @@ import {
   LocationPermission,
 } from 'openapi-internal-sdk';
 import { InternalClient, Joi } from '../tools';
-import { Prisma, RideModel } from '.prisma/client';
+import { Prisma, RideModel } from '@prisma/client';
 
 import dayjs from 'dayjs';
 
