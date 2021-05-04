@@ -9,11 +9,10 @@ import {
 
 import { PlatformPermission } from 'openapi-internal-sdk';
 
-export function PlatformMiddleware(
-  permissionIds: string[] = []
-): Callback {
+export function PlatformMiddleware(permissionIds: string[] = []): Callback {
   const platformClient = InternalClient.getPlatform([
-    PlatformPermission.ACCESS_KEYS_AUTHORIZE,
+    PlatformPermission.AUTHORIZE_USER,
+    PlatformPermission.AUTHORIZE_ACCESS_KEY,
   ]);
 
   return Wrapper(async (req, res, next) => {
@@ -21,13 +20,26 @@ export function PlatformMiddleware(
       const { headers } = req;
       const platformAccessKeyId = `${headers['x-hikick-platform-access-key-id']}`;
       const platformSecretAccessKey = `${headers['x-hikick-platform-secret-access-key']}`;
-      const accessKey = await platformClient.getPlatformFromAccessKey({
-        platformAccessKeyId,
-        platformSecretAccessKey,
-        permissionIds,
-      });
+      const sessionId = `${headers['authorization']}`.substr(7);
+      if (platformAccessKeyId && platformSecretAccessKey) {
+        const accessKey = await platformClient.getAccessKeyWithPermissions({
+          platformAccessKeyId,
+          platformSecretAccessKey,
+          permissionIds,
+        });
 
-      req.loggined = { accessKey };
+        const { platform } = accessKey;
+        req.loggined = { platform, accessKey };
+      } else {
+        const user = await platformClient.getUserWithPermissions({
+          sessionId,
+          permissionIds,
+        });
+
+        const { platform } = user;
+        req.loggined = { platform, user };
+      }
+
       next();
     } catch (err) {
       if (process.env.NODE_ENV === 'dev') {

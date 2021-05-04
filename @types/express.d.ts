@@ -1,6 +1,10 @@
 import { PaymentModel, RideModel } from '.prisma/client';
 import 'express';
-import { InternalPlatformAccessKey } from 'openapi-internal-sdk';
+import {
+  InternalPlatform,
+  InternalPlatformAccessKey,
+  InternalPlatformUser,
+} from 'openapi-internal-sdk';
 
 declare global {
   namespace Express {
@@ -8,7 +12,9 @@ declare global {
       ride: RideModel;
       payment: PaymentModel;
       loggined: {
-        accessKey: InternalPlatformAccessKey;
+        platform: InternalPlatform;
+        accessKey?: InternalPlatformAccessKey;
+        user?: InternalPlatformUser;
       };
       internal: {
         sub: string;

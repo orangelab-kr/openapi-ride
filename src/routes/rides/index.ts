@@ -19,7 +19,7 @@ export function getRidesRouter(): Router {
     '/',
     Wrapper(async (req, res) => {
       const { query } = req;
-      query.platformId = req.loggined.accessKey.platform.platformId;
+      query.platformId = req.loggined.platform.platformId;
       const { total, rides } = await Ride.getRides(query);
       res.json({ opcode: OPCODE.SUCCESS, rides, total });
     })
@@ -28,11 +28,7 @@ export function getRidesRouter(): Router {
   router.post(
     '/',
     Wrapper(async (req, res) => {
-      const { rideId } = await Ride.startRide(
-        req.loggined.accessKey.platform,
-        req.body
-      );
-
+      const { rideId } = await Ride.startRide(req.loggined.platform, req.body);
       res.json({ opcode: OPCODE.SUCCESS, rideId });
     })
   );

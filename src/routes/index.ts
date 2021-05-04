@@ -38,7 +38,7 @@ export function getRouter(): Router {
     PlatformMiddleware(),
     Wrapper(async (req, res) => {
       const { query } = req;
-      query.platformId = req.loggined.accessKey.platform.platformId;
+      query.platformId = req.loggined.platform.platformId;
       const { payments, total } = await Payment.getPayments(query);
       res.json({ opcode: OPCODE.SUCCESS, payments, total });
     })
