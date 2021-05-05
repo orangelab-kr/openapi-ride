@@ -1,11 +1,9 @@
-import { Callback, InternalError, OPCODE, Wrapper } from '..';
+import { Callback, InternalError, OPCODE, Payment, Wrapper } from '../..';
 
-import { Payment } from '../controllers';
-
-export function InternalPaymentMiddleware(): Callback {
+export function PaymentMiddleware(): Callback {
   return Wrapper(async (req, res, next) => {
     const { paymentId } = req.params;
-    const { ride } = req.internal;
+    const { ride } = req;
     if (!ride || typeof paymentId !== 'string') {
       throw new InternalError(
         '해당 결제 기록을 찾을 수 없습니다.',
@@ -13,7 +11,7 @@ export function InternalPaymentMiddleware(): Callback {
       );
     }
 
-    req.internal.payment = await Payment.getPaymentOrThrow(ride, paymentId);
+    req.payment = await Payment.getPaymentOrThrow(ride, paymentId);
     next();
   });
 }

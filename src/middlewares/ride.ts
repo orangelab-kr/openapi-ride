@@ -11,7 +11,7 @@ export function RideMiddleware(): Callback {
       );
     }
 
-    req.ride = await Ride.getRideOrThrow(platform, rideId);
+    req.ride = await Ride.getRideOrThrow(rideId, platform);
     next();
   });
 }

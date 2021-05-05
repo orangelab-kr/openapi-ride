@@ -4,6 +4,9 @@ import dayjs from 'dayjs';
 import jwt from 'jsonwebtoken';
 
 export * from './permissions';
+export * from './ride';
+export * from './payment';
+
 export function InternalMiddleware(): Callback {
   return Wrapper(async (req, res, next) => {
     const { headers, query } = req;
@@ -18,7 +21,7 @@ export function InternalMiddleware(): Callback {
       );
     }
 
-    const key = process.env.HIKICK_OPENAPI_DISCOUNT_KEY;
+    const key = process.env.HIKICK_OPENAPI_RIDE_KEY;
     if (!key || !token) {
       throw new InternalError(
         '인증이 필요한 서비스입니다.',
@@ -29,7 +32,7 @@ export function InternalMiddleware(): Callback {
     try {
       const data = jwt.verify(token, key);
       const schema = Joi.object({
-        sub: Joi.string().valid('openapi-discount').required(),
+        sub: Joi.string().valid('openapi-ride').required(),
         iss: Joi.string().required(),
         aud: Joi.string().email().required(),
         prs: Joi.string().required(),

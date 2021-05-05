@@ -293,7 +293,7 @@ export class Ride {
 
   public static async terminateRide(
     ride: RideModel,
-    props: { latitude: number; longitude: number; photo: string }
+    props: { latitude?: number; longitude?: number }
   ): Promise<void> {
     if (ride.terminatedAt) {
       throw new InternalError('이미 종료된 라이드입니다.', OPCODE.ERROR);
@@ -382,10 +382,10 @@ export class Ride {
   }
 
   public static async getRideOrThrow(
-    platform: InternalPlatform,
-    rideId: string
+    rideId: string,
+    platform?: InternalPlatform
   ): Promise<RideModel> {
-    const ride = await this.getRide(platform, rideId);
+    const ride = await this.getRide(rideId, platform);
     if (!ride) {
       throw new InternalError(
         '해당 라이드를 찾을 수 없습니다.',
@@ -404,10 +404,10 @@ export class Ride {
   }
 
   public static async getRide(
-    platform: InternalPlatform,
-    rideId: string
+    rideId: string,
+    platform?: InternalPlatform
   ): Promise<RideModel | null> {
-    const { platformId } = platform;
+    const platformId = platform && platform.platformId;
     const ride = await prisma.rideModel.findFirst({
       where: { platformId, rideId },
       include: {

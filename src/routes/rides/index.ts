@@ -1,9 +1,15 @@
-import { OPCODE, Pricing, Ride, RideMiddleware, Wrapper } from '../..';
+import {
+  OPCODE,
+  Pricing,
+  Ride,
+  RideMiddleware,
+  Wrapper,
+  getRidesLightsRouter,
+  getRidesLockRouter,
+  getRidesPaymentsRouter,
+} from '../..';
 
 import { Router } from 'express';
-import { getRidesLightsRouter } from '.';
-import { getRidesLockRouter } from './lock';
-import { getRidesPaymentsRouter } from './payments';
 
 export * from './lights';
 export * from './lock';
@@ -55,7 +61,7 @@ export function getRidesRouter(): Router {
     '/:rideId',
     RideMiddleware(),
     Wrapper(async (req, res) => {
-      await Ride.terminateRide(req.ride, req.body);
+      await Ride.terminateRide(req.ride, req.query);
       res.json({ opcode: OPCODE.SUCCESS });
     })
   );

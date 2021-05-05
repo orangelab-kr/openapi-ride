@@ -1,8 +1,22 @@
-import { Callback, InternalError, Wrapper } from '../..';
+import { Callback, InternalError, OPCODE, Wrapper } from '../..';
 
-import { OPCODE } from '../../tools';
+export enum PERMISSION {
+  RIDE_LIST,
+  RIDE_DETAILS,
 
-export enum PERMISSION {}
+  RIDE_START,
+  RIDE_TERMINATE,
+
+  RIDE_PHOTO,
+  RIDE_PRICING,
+  RIDE_TIMELINE,
+  RIDE_CONTROL,
+
+  PAYMENT_LIST,
+  PAYMENT_DETAILS,
+  PAYMENT_ADD,
+  PAYMENT_REFUND,
+}
 
 export function InternalPermissionMiddleware(permission: PERMISSION): Callback {
   return Wrapper(async (req, res, next) => {

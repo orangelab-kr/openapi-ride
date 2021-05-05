@@ -23,6 +23,8 @@ declare global {
         prs: boolean[];
         iat: Date;
         exp: Date;
+        ride: RideModel;
+        payment: PaymentModel;
       };
     }
   }

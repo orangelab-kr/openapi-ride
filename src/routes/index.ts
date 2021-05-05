@@ -1,13 +1,21 @@
-import { InternalError, OPCODE, Wrapper, logger } from '..';
+import {
+  InternalError,
+  InternalMiddleware,
+  OPCODE,
+  Payment,
+  PlatformMiddleware,
+  Wrapper,
+  getInternalRouter,
+  getRidesRouter,
+  logger,
+} from '..';
 import express, { Router } from 'express';
 
-import { Payment } from '../controllers';
-import { PlatformMiddleware } from '../middlewares';
 import cors from 'cors';
-import { getRidesRouter } from './rides';
 import morgan from 'morgan';
 import os from 'os';
 
+export * from './internal';
 export * from './rides';
 
 export function getRouter(): Router {
@@ -22,6 +30,7 @@ export function getRouter(): Router {
   router.use(express.json());
   router.use(express.urlencoded({ extended: true }));
   router.use('/rides', PlatformMiddleware(), getRidesRouter());
+  router.use('/internal', InternalMiddleware(), getInternalRouter());
   router.get(
     '/',
     Wrapper(async (_req, res) => {
