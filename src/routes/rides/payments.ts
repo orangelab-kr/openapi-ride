@@ -22,6 +22,16 @@ export function getRidesPaymentsRouter(): Router {
     })
   );
 
+  router.get(
+    '/:paymentId/process',
+    PaymentMiddleware(),
+    Wrapper(async (req, res) => {
+      const { payment } = req;
+      await Payment.setProcessed(payment);
+      res.json({ opcode: OPCODE.SUCCESS });
+    })
+  );
+
   router.post(
     '/',
     Wrapper(async (req, res) => {

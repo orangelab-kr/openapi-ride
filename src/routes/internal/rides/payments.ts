@@ -22,6 +22,16 @@ export function getInternalRidesPaymentsRouter(): Router {
     })
   );
 
+  router.get(
+    '/:paymentId/process',
+    InternalPaymentMiddleware(),
+    Wrapper(async (req, res) => {
+      const { internal } = req;
+      await Payment.setProcessed(internal.payment);
+      res.json({ opcode: OPCODE.SUCCESS });
+    })
+  );
+
   router.post(
     '/',
     Wrapper(async (req, res) => {

@@ -84,6 +84,14 @@ export class Payment {
     return { payments, total };
   }
 
+  public static async setProcessed(payment: PaymentModel): Promise<void> {
+    const { paymentId } = payment;
+    await prisma.paymentModel.update({
+      where: { paymentId },
+      data: { processedAt: new Date() },
+    });
+  }
+
   public static async refreshPrice(ride: RideModel): Promise<void> {
     const { rideId } = ride;
     const payments = await prisma.paymentModel.findMany({
@@ -151,7 +159,10 @@ export class Payment {
     const { paymentId } = payment;
     payment = await prisma.paymentModel.update({
       where: { paymentId },
-      data: { refundedAt: new Date() },
+      data: {
+        refundedAt: new Date(),
+        processedAt: null,
+      },
     });
 
     await Payment.sendRefundWebhook(payment);
