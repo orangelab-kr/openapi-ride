@@ -18,10 +18,15 @@ export function PlatformMiddleware(permissionIds: string[] = []): Callback {
   return Wrapper(async (req, res, next) => {
     try {
       const { headers } = req;
-      const platformAccessKeyId = `${headers['x-hikick-platform-access-key-id']}`;
-      const platformSecretAccessKey = `${headers['x-hikick-platform-secret-access-key']}`;
-      const sessionId = `${headers['authorization']}`.substr(7);
-      if (platformAccessKeyId && platformSecretAccessKey) {
+      const {
+        authorization,
+        'x-hikick-platform-access-key-id': platformAccessKeyId,
+        'x-hikick-platform-secret-access-key': platformSecretAccessKey,
+      } = headers;
+      if (
+        typeof platformAccessKeyId === 'string' &&
+        typeof platformSecretAccessKey === 'string'
+      ) {
         const accessKey = await platformClient.getAccessKeyWithPermissions({
           platformAccessKeyId,
           platformSecretAccessKey,
@@ -31,6 +36,7 @@ export function PlatformMiddleware(permissionIds: string[] = []): Callback {
         const { platform } = accessKey;
         req.loggined = { platform, accessKey };
       } else {
+        const sessionId = `${authorization}`.substr(7);
         const user = await platformClient.getUserWithPermissions({
           sessionId,
           permissionIds,
