@@ -136,6 +136,17 @@ export class Payment {
     if (amount <= 0) return;
     const { rideId, platformId, franchiseId } = ride;
     const payment = await prisma.paymentModel.create({
+      include: {
+        ride: {
+          include: {
+            startedPhoneLocation: true,
+            startedKickboardLocation: true,
+            terminatedPhoneLocation: true,
+            terminatedKickboardLocation: true,
+            receipt: true,
+          },
+        },
+      },
       data: {
         platformId,
         rideId,
@@ -159,6 +170,17 @@ export class Payment {
     const { paymentId } = payment;
     payment = await prisma.paymentModel.update({
       where: { paymentId },
+      include: {
+        ride: {
+          include: {
+            startedPhoneLocation: true,
+            startedKickboardLocation: true,
+            terminatedPhoneLocation: true,
+            terminatedKickboardLocation: true,
+            receipt: true,
+          },
+        },
+      },
       data: {
         refundedAt: new Date(),
         processedAt: null,
@@ -205,6 +227,17 @@ export class Payment {
     const { rideId } = ride;
     const payment = await prisma.paymentModel.findFirst({
       where: { rideId, paymentId },
+      include: {
+        ride: {
+          include: {
+            startedPhoneLocation: true,
+            startedKickboardLocation: true,
+            terminatedPhoneLocation: true,
+            terminatedKickboardLocation: true,
+            receipt: true,
+          },
+        },
+      },
     });
 
     return payment;

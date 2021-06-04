@@ -129,9 +129,9 @@ model PaymentModel {
   paymentType PaymentType
   amount      Int
 
-  rideId     String
-  ride       RideModel @relation(fields: [rideId], references: [rideId])
-  refundedAt DateTime?
+  rideId      String
+  ride        RideModel @relation(fields: [rideId], references: [rideId])
+  refundedAt  DateTime?
   processedAt DateTime?
 
   createdAt DateTime  @default(now())
