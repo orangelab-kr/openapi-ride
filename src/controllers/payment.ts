@@ -162,6 +162,14 @@ export class Payment {
     return payment;
   }
 
+  public static async refundAllPayment(ride: RideModel): Promise<void> {
+    const { rideId } = ride;
+    const payments = await prisma.paymentModel.findMany({ where: { rideId } });
+    await Promise.all(
+      payments.map((payment) => this.refundPayment(ride, payment))
+    );
+  }
+
   public static async refundPayment(
     ride: RideModel,
     payment: PaymentModel

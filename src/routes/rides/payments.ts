@@ -42,6 +42,14 @@ export function getRidesPaymentsRouter(): Router {
   );
 
   router.delete(
+    '/',
+    Wrapper(async (req, res) => {
+      await Payment.refundAllPayment(req.ride);
+      res.json({ opcode: OPCODE.SUCCESS });
+    })
+  );
+
+  router.delete(
     '/:paymentId',
     PaymentMiddleware(),
     Wrapper(async (req, res) => {
