@@ -43,7 +43,7 @@ export class Pricing {
   ): Promise<Receipt> {
     const { latitude, longitude } = props;
     const { discountGroupId, discountId, startedAt } = ride;
-    const minutes = dayjs(startedAt).diff(dayjs(), 'minutes');
+    const minutes = dayjs(dayjs()).diff(startedAt, 'minutes');
     return this.getPricing({
       latitude,
       longitude,
