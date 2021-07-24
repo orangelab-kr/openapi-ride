@@ -184,7 +184,7 @@ export class Ride {
     }
 
     const { gps } = await kickboard.getLatestStatus();
-    await kickboard.setMaxSpeed(25);
+    await kickboard.setMaxSpeed(20);
     await kickboard.start();
     await kickboard.setPhoto(null);
 

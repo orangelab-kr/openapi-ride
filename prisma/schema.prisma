@@ -16,7 +16,9 @@ model RideModel {
   kickboardCode   String
   platformId      String
   franchiseId     String
-  regionId        String
+  regionId        String?
+  // 지역이 NULL일 수는 있으나 매출이 안잡힘
+
   discountGroupId String?
   discountId      String?
   insuranceId     String
