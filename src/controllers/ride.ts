@@ -207,13 +207,15 @@ export class Ride {
       longitude,
     });
 
-    const startedPhoneLocation: Prisma.LocationModelCreateNestedOneWithoutStartedPhoneLocationInput = {
-      create: { latitude, longitude },
-    };
+    const startedPhoneLocation: Prisma.LocationModelCreateNestedOneWithoutStartedPhoneLocationInput =
+      {
+        create: { latitude, longitude },
+      };
 
-    const startedKickboardLocation: Prisma.LocationModelCreateNestedOneWithoutStartedKickboardLocationInput = {
-      create: { latitude: gps.latitude, longitude: gps.longitude },
-    };
+    const startedKickboardLocation: Prisma.LocationModelCreateNestedOneWithoutStartedKickboardLocationInput =
+      {
+        create: { latitude: gps.latitude, longitude: gps.longitude },
+      };
 
     const ride = await prisma.rideModel.create({
       data: {
@@ -344,8 +346,8 @@ export class Ride {
       longitude,
     });
 
-    const servicePrice = pricing.standard.total + pricing.perMinute.total;
     const surchargePrice = pricing.surcharge.total;
+    const servicePrice = pricing.total - surchargePrice;
     await Payment.addPayment(ride, {
       paymentType: PaymentType.SERVICE,
       amount: servicePrice,

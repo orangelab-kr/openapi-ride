@@ -149,7 +149,7 @@ export class Pricing {
       receipt.perMinute.total +
       receipt.surcharge.total;
 
-    if (pricing.maxPrice && receipt.total > pricing.maxPrice) {
+    if (pricing.maxPrice !== null && receipt.total > pricing.maxPrice) {
       receipt.total = pricing.maxPrice;
     }
 
