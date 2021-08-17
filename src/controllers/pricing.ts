@@ -138,14 +138,20 @@ export class Pricing {
       receipt.standard.price +
       receipt.perMinute.price +
       receipt.surcharge.price;
+
     receipt.discount =
       receipt.standard.discount +
       receipt.perMinute.discount +
       receipt.surcharge.discount;
+
     receipt.total =
       receipt.standard.total +
       receipt.perMinute.total +
       receipt.surcharge.total;
+
+    if (pricing.maxPrice && receipt.total > pricing.maxPrice) {
+      receipt.total = pricing.maxPrice;
+    }
 
     return receipt;
   }
