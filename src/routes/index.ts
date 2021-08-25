@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import {
+  clusterInfo,
   getInternalRouter,
   getRidesRouter,
   InternalMiddleware,
@@ -17,6 +18,16 @@ export function getRouter(): Router {
 
   router.use('/rides', PlatformMiddleware(), getRidesRouter());
   router.use('/internal', InternalMiddleware(), getInternalRouter());
+  router.get(
+    '/',
+    Wrapper(async (_req, res) => {
+      res.json({
+        opcode: OPCODE.SUCCESS,
+        ...clusterInfo,
+      });
+    })
+  );
+
   router.get(
     '/payments',
     PlatformMiddleware(),

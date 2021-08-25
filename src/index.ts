@@ -2,7 +2,6 @@ import cors from 'cors';
 import express from 'express';
 import { OPCODE } from 'openapi-internal-sdk';
 import {
-  clusterInfo,
   Database,
   getRouter,
   InternalError,
@@ -27,16 +26,6 @@ async function main() {
   app.use(express.urlencoded({ extended: true }));
   app.use(LoggerMiddleware());
   app.use('/v1/ride', getRouter());
-  app.get(
-    '/',
-    Wrapper(async (_req, res) => {
-      res.json({
-        opcode: OPCODE.SUCCESS,
-        ...clusterInfo,
-      });
-    })
-  );
-
   app.all(
     '*',
     Wrapper(async () => {
