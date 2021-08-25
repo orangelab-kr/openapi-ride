@@ -1,22 +1,20 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["nApi"]
 }
 
 model RideModel {
   rideId String @id @default(uuid())
 
-  kickboardCode   String
-  platformId      String
-  franchiseId     String
-  regionId        String?
+  kickboardCode String
+  platformId    String
+  franchiseId   String
+  regionId      String?
   // 지역이 NULL일 수는 있으나 매출이 안잡힘
 
   discountGroupId String?
