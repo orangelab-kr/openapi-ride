@@ -1,5 +1,9 @@
+import { Router } from 'express';
+import { PlatformPermission } from 'openapi-internal-sdk';
 import {
-  InternalClient,
+  getInternalRidesLightsRouter,
+  getInternalRidesLockRouter,
+  getInternalRidesPaymentsRouter,
   InternalPermissionMiddleware,
   InternalRideMiddleware,
   OPCODE,
@@ -7,13 +11,8 @@ import {
   Pricing,
   Ride,
   Wrapper,
-  getInternalRidesLightsRouter,
-  getInternalRidesLockRouter,
-  getInternalRidesPaymentsRouter,
 } from '../../..';
-
-import { PlatformPermission } from 'openapi-internal-sdk';
-import { Router } from 'express';
+import { InternalClient } from '../../../tools';
 
 export * from './lights';
 export * from './lock';

@@ -1,20 +1,19 @@
-import { Database, InternalClient, InternalError, Joi, OPCODE } from '../tools';
-import {
-  InsurancePermission,
-  InternalKickboardMode,
-  InternalPlatform,
-  WebhookPermission,
-} from 'openapi-internal-sdk';
 import {
   PaymentType,
   Prisma,
   RideModel,
   RideTerminatedType,
 } from '@prisma/client';
-
-import { Payment } from './payment';
-import { Pricing } from '..';
 import dayjs from 'dayjs';
+import {
+  InsurancePermission,
+  InternalKickboardMode,
+  InternalPlatform,
+  WebhookPermission,
+} from 'openapi-internal-sdk';
+import { Payment } from '.';
+import { InternalError, Joi, OPCODE, Pricing } from '..';
+import { Database, InternalClient } from '../tools';
 
 const { prisma } = Database;
 const kickboardClient = InternalClient.getKickboard();

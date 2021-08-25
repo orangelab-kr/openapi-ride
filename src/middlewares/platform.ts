@@ -1,11 +1,11 @@
 import {
   Callback,
-  InternalClient,
   InternalError,
   OPCODE,
   Wrapper,
   logger,
-} from '../tools';
+  InternalClient,
+} from '..';
 
 import { PlatformPermission } from 'openapi-internal-sdk';
 
