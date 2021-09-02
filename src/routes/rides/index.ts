@@ -70,7 +70,8 @@ export function getRidesRouter(): Router {
     '/:rideId/pricing',
     RideMiddleware(),
     Wrapper(async (req, res) => {
-      const pricing = await Pricing.getPricingByRide(req.ride, req.query);
+      const { ride, query } = req;
+      const pricing = await Pricing.getPricingByRide(ride, query as any);
       res.json({ opcode: OPCODE.SUCCESS, pricing });
     })
   );

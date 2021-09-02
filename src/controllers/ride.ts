@@ -416,7 +416,13 @@ export class Ride {
         startedKickboardLocation: true,
         terminatedPhoneLocation: true,
         terminatedKickboardLocation: true,
-        receipt: true,
+        receipt: {
+          include: {
+            standard: true,
+            perMinute: true,
+            surcharge: true,
+          },
+        },
       },
     });
 

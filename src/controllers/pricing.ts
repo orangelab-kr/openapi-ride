@@ -44,7 +44,7 @@ export class Pricing {
     const { latitude, longitude } = props;
     const { discountGroupId, discountId, startedAt } = ride;
     const minutes = dayjs(dayjs()).diff(startedAt, 'minutes');
-    return this.getPricing({
+    return this.calculatePricing({
       latitude,
       longitude,
       minutes,
@@ -79,7 +79,7 @@ export class Pricing {
     return input;
   }
 
-  public static async getPricing(props: {
+  public static async calculatePricing(props: {
     discountGroupId: string | null;
     discountId: string | null;
     minutes: number;
