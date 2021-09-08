@@ -16,7 +16,7 @@ export * from './rides';
 export function getRouter(): Router {
   const router = Router();
 
-  router.use('/rides', PlatformMiddleware(), getRidesRouter());
+  router.use('/rides', getRidesRouter());
   router.use('/internal', InternalMiddleware(), getInternalRouter());
   router.get(
     '/',
@@ -30,7 +30,10 @@ export function getRouter(): Router {
 
   router.get(
     '/payments',
-    PlatformMiddleware(),
+    PlatformMiddleware({
+      permissionIds: ['rides.payments.all'],
+      final: true,
+    }),
     Wrapper(async (req, res) => {
       const { query } = req;
       query.platformId = req.loggined.platform.platformId;

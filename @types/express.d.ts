@@ -11,6 +11,7 @@ declare global {
     interface Request {
       ride: RideModel;
       payment: PaymentModel;
+      permissionIds: string[];
       loggined: {
         platform: InternalPlatform;
         accessKey?: InternalPlatformAccessKey;

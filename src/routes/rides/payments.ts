@@ -1,4 +1,10 @@
-import { OPCODE, Payment, PaymentMiddleware, Wrapper } from '../..';
+import {
+  OPCODE,
+  Payment,
+  PaymentMiddleware,
+  PlatformMiddleware,
+  Wrapper,
+} from '../..';
 
 import { Router } from 'express';
 
@@ -7,6 +13,10 @@ export function getRidesPaymentsRouter(): Router {
 
   router.get(
     '/',
+    PlatformMiddleware({
+      permissionIds: ['rides.payments.list'],
+      final: true,
+    }),
     Wrapper(async (req, res) => {
       const payments = await Payment.getPaymentsByRide(req.ride);
       res.json({ opcode: OPCODE.SUCCESS, payments });
@@ -15,6 +25,10 @@ export function getRidesPaymentsRouter(): Router {
 
   router.get(
     '/:paymentId',
+    PlatformMiddleware({
+      permissionIds: ['rides.payments.view'],
+      final: true,
+    }),
     PaymentMiddleware(),
     Wrapper(async (req, res) => {
       const { payment } = req;
@@ -24,6 +38,10 @@ export function getRidesPaymentsRouter(): Router {
 
   router.get(
     '/:paymentId/process',
+    PlatformMiddleware({
+      permissionIds: ['rides.payments.process'],
+      final: true,
+    }),
     PaymentMiddleware(),
     Wrapper(async (req, res) => {
       const { payment } = req;
@@ -34,6 +52,10 @@ export function getRidesPaymentsRouter(): Router {
 
   router.post(
     '/',
+    PlatformMiddleware({
+      permissionIds: ['rides.payments.create'],
+      final: true,
+    }),
     Wrapper(async (req, res) => {
       const { ride, body } = req;
       const payment = await Payment.addPayment(ride, body);
@@ -43,6 +65,10 @@ export function getRidesPaymentsRouter(): Router {
 
   router.delete(
     '/',
+    PlatformMiddleware({
+      permissionIds: ['rides.payments.refund'],
+      final: true,
+    }),
     Wrapper(async (req, res) => {
       await Payment.refundAllPayment(req.ride);
       res.json({ opcode: OPCODE.SUCCESS });
@@ -51,6 +77,10 @@ export function getRidesPaymentsRouter(): Router {
 
   router.delete(
     '/:paymentId',
+    PlatformMiddleware({
+      permissionIds: ['rides.payments.refund'],
+      final: true,
+    }),
     PaymentMiddleware(),
     Wrapper(async (req, res) => {
       await Payment.refundPayment(req.ride, req.payment);
