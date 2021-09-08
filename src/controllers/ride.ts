@@ -193,7 +193,7 @@ export class Ride {
       await discountClient
         .getDiscountGroup(discountGroupId)
         .then((discountGroup) => discountGroup.getDiscount(discountId))
-        .then((discount) => discount.update({ usedAt: new Date() }));
+        .then((discount) => discount.update({ lockedAt: new Date() }));
     }
 
     const { insuranceId } = await insuranceClient.start({
