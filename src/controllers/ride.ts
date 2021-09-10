@@ -152,7 +152,7 @@ export class Ride {
       discountId: Joi.string().uuid().optional(),
       latitude: Joi.number().min(-90).max(90).required(),
       longitude: Joi.number().min(-180).max(180).required(),
-    });
+    }).with('discountGroupId', 'discountId');
 
     const {
       userId,
@@ -301,8 +301,8 @@ export class Ride {
     }
 
     const schema = Joi.object({
-      latitude: Joi.number().min(-90).max(90).required(),
-      longitude: Joi.number().min(-180).max(180).required(),
+      latitude: Joi.number().min(-90).max(90).optional(),
+      longitude: Joi.number().min(-180).max(180).optional(),
     });
 
     const {
@@ -326,23 +326,24 @@ export class Ride {
         .then((discount) => discount.update({ usedAt: new Date() }));
     }
 
-    const terminatedPhoneLocation = {
-      create: { latitude, longitude },
-    };
+    const terminatedPhoneLocation =
+      latitude && longitude ? { create: { latitude, longitude } } : undefined;
 
     const terminatedKickboardLocation = {
       create: { latitude: gps.latitude, longitude: gps.longitude },
     };
 
     if (insuranceId) {
-      await insuranceClient
-        .getInsurance(insuranceId)
-        .then((insurance) => insurance.end());
+      try {
+        await insuranceClient
+          .getInsurance(insuranceId)
+          .then((insurance) => insurance.end());
+      } catch (err) {}
     }
 
     const pricing = await Pricing.getPricingByRide(ride, {
-      latitude,
-      longitude,
+      latitude: gps.latitude,
+      longitude: gps.longitude,
     });
 
     const surchargePrice = pricing.surcharge.total;

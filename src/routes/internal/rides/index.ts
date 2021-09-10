@@ -102,7 +102,11 @@ export function getInternalRidesRouter(): Router {
     InternalRideMiddleware(),
     Wrapper(async (req, res) => {
       const { internal, query } = req;
-      const pricing = await Pricing.getPricingByRide(internal.ride, query);
+      const pricing = await Pricing.getPricingByRide(
+        internal.ride,
+        query as any
+      );
+
       res.json({ opcode: OPCODE.SUCCESS, pricing });
     })
   );

@@ -39,7 +39,7 @@ export const DefaultPricingResult: Receipt = {
 export class Pricing {
   public static async getPricingByRide(
     ride: RideModel,
-    props: { latitude?: number; longitude?: number }
+    props: { latitude: number; longitude: number }
   ): Promise<Receipt> {
     const { latitude, longitude } = props;
     const { discountGroupId, discountId, startedAt } = ride;
@@ -83,8 +83,8 @@ export class Pricing {
     discountGroupId: string | null;
     discountId: string | null;
     minutes: number;
-    latitude?: number;
-    longitude?: number;
+    latitude: number;
+    longitude: number;
   }): Promise<Receipt> {
     const receipt: Receipt = { ...DefaultPricingResult };
     receipt.isNightly = this.isNightly();
@@ -101,7 +101,9 @@ export class Pricing {
       minutes: Joi.number().required(),
       discountGroupId: Joi.string().allow(null).uuid().optional(),
       discountId: Joi.string().allow(null).uuid().optional(),
-    }).validateAsync(props);
+    })
+      .with('discountGroupId', 'discountId')
+      .validateAsync(props);
     const location = await locationClient.getGeofenceByLocation({ lat, lng });
     const [pricing, profile] = await Promise.all([
       location.getRegion().then((region) => region.getPricing()),
