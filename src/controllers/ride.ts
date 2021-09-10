@@ -294,7 +294,12 @@ export class Ride {
 
   public static async terminateRide(
     ride: RideModel,
-    props: { latitude?: number; longitude?: number }
+    props: {
+      latitude?: number;
+      longitude?: number;
+      terminatedType?: RideTerminatedType;
+      terminatedAt?: Date;
+    }
   ): Promise<void> {
     if (ride.terminatedAt) {
       throw new InternalError('이미 종료된 라이드입니다.', OPCODE.ERROR);
@@ -303,14 +308,23 @@ export class Ride {
     const schema = Joi.object({
       latitude: Joi.number().min(-90).max(90).optional(),
       longitude: Joi.number().min(-180).max(180).optional(),
+      terminatedAt: Joi.date().default(new Date()).optional(),
+      terminatedType: Joi.string()
+        .valid(...Object.values(RideTerminatedType))
+        .default(RideTerminatedType.USER_REQUESTED)
+        .optional(),
     });
 
     const {
       latitude,
       longitude,
+      terminatedType,
+      terminatedAt,
     }: {
       latitude: number;
       longitude: number;
+      terminatedType: RideTerminatedType;
+      terminatedAt: Date;
     } = await schema.validateAsync(props);
     const { kickboardCode, discountGroupId, discountId, insuranceId } = ride;
     const kickboard = await kickboardClient.getKickboard(kickboardCode);
@@ -337,13 +351,14 @@ export class Ride {
       try {
         await insuranceClient
           .getInsurance(insuranceId)
-          .then((insurance) => insurance.end());
+          .then((insurance) => insurance.end({ endedAt: terminatedAt }));
       } catch (err) {}
     }
 
     const pricing = await Pricing.getPricingByRide(ride, {
       latitude: gps.latitude,
       longitude: gps.longitude,
+      terminatedAt,
     });
 
     const surchargePrice = pricing.surcharge.total;
@@ -359,8 +374,6 @@ export class Ride {
     });
 
     const { rideId } = ride;
-    const terminatedAt = new Date();
-    const terminatedType = RideTerminatedType.USER_REQUESTED;
     const receipt = Pricing.getReceiptToCreateInput(pricing);
     const updatedRide = await prisma.rideModel.update({
       where: { rideId },

@@ -1,9 +1,11 @@
 import {
   DiscountPermission,
   InternalDiscountGroup,
+  InternalError,
   InternalLocationPricing,
   InternalLocationProfile,
   LocationPermission,
+  OPCODE,
 } from 'openapi-internal-sdk';
 import { InternalClient, Joi } from '../tools';
 import { Prisma, RideModel } from '@prisma/client';
@@ -39,11 +41,29 @@ export const DefaultPricingResult: Receipt = {
 export class Pricing {
   public static async getPricingByRide(
     ride: RideModel,
-    props: { latitude: number; longitude: number }
+    props: {
+      latitude: number;
+      longitude: number;
+      startedAt?: Date;
+      terminatedAt?: Date;
+      discountGroupId?: string;
+      discount?: string;
+    }
   ): Promise<Receipt> {
     const { latitude, longitude } = props;
-    const { discountGroupId, discountId, startedAt } = ride;
-    const minutes = dayjs(dayjs()).diff(startedAt, 'minutes');
+    const { discountGroupId, discountId, startedAt, terminatedAt } = {
+      ...ride,
+      ...props,
+    };
+
+    const minutes = dayjs(terminatedAt).diff(dayjs(startedAt), 'minutes');
+    if (minutes < 0) {
+      throw new InternalError(
+        '종료 시점이 시작 시점보다 빠를 수 없습니다.',
+        OPCODE.ERROR
+      );
+    }
+
     return this.calculatePricing({
       latitude,
       longitude,
