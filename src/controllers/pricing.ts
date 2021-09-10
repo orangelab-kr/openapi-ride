@@ -56,7 +56,8 @@ export class Pricing {
       ...props,
     };
 
-    const minutes = dayjs(terminatedAt).diff(dayjs(startedAt), 'minutes');
+    const currentDate = dayjs(terminatedAt || undefined);
+    const minutes = currentDate.diff(dayjs(startedAt), 'minutes');
     if (minutes < 0) {
       throw new InternalError(
         '종료 시점이 시작 시점보다 빠를 수 없습니다.',
