@@ -51,12 +51,19 @@ export class Pricing {
     }
   ): Promise<Receipt> {
     const { latitude, longitude } = props;
-    const { discountGroupId, discountId, startedAt, terminatedAt } = {
-      ...ride,
-      ...props,
-    };
+    const schema = Joi.object({
+      latitude: Joi.number().min(-90).max(90).required(),
+      longitude: Joi.number().min(-180).max(180).required(),
+      startedAt: Joi.date().required(),
+      terminatedAt: Joi.date().default(new Date()).optional(),
+      discountGroupId: Joi.string().allow(null).uuid().optional(),
+      discountId: Joi.string().allow(null).uuid().optional(),
+    }).with('discountGroupId', 'discountId');
 
-    const currentDate = dayjs(terminatedAt || undefined);
+    const { discountGroupId, discountId, startedAt, terminatedAt } =
+      await schema.validateAsync({ ...ride, ...props });
+
+    const currentDate = dayjs(terminatedAt);
     const minutes = currentDate.diff(dayjs(startedAt), 'minutes');
     if (minutes < 0) {
       throw new InternalError(
