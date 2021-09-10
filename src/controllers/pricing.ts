@@ -55,7 +55,7 @@ export class Pricing {
       latitude: Joi.number().min(-90).max(90).required(),
       longitude: Joi.number().min(-180).max(180).required(),
       startedAt: Joi.date().required(),
-      terminatedAt: Joi.date().default(new Date()).optional(),
+      terminatedAt: Joi.date().allow(null).default(new Date()).optional(),
       discountGroupId: Joi.string().allow(null).uuid().optional(),
       discountId: Joi.string().allow(null).uuid().optional(),
     }).with('discountGroupId', 'discountId');
@@ -63,7 +63,7 @@ export class Pricing {
     const { discountGroupId, discountId, startedAt, terminatedAt } =
       await schema.validateAsync({ ...ride, ...props });
 
-    const currentDate = dayjs(terminatedAt);
+    const currentDate = dayjs(terminatedAt || undefined);
     const minutes = currentDate.diff(dayjs(startedAt), 'minutes');
     if (minutes < 0) {
       throw new InternalError(

@@ -210,8 +210,7 @@ export class Ride {
 
     const { franchiseId, regionId } = kickboard;
     if (discountGroupId && discountId) {
-      const discountClient = InternalClient.getDiscount();
-      await discountClient
+      await InternalClient.getDiscount()
         .getDiscountGroup(discountGroupId)
         .then((discountGroup) => discountGroup.getDiscount(discountId))
         .then((discount) => discount.update({ lockedAt: new Date() }));
@@ -300,6 +299,50 @@ export class Ride {
     await kickboardClient
       .getKickboard(kickboardCode)
       .then((kickboard) => kickboard.setPhoto(photo));
+  }
+
+  public static async changeDiscount(
+    ride: RideModel,
+    props: { discountGroupId?: string; discountId?: string }
+  ): Promise<() => Prisma.Prisma__RideModelClient<RideModel>> {
+    if (ride.terminatedAt) {
+      throw new InternalError('이미 종료된 라이드입니다.', OPCODE.ERROR);
+    }
+
+    const { rideId } = ride;
+    const data: Prisma.RideModelUpdateInput = {};
+    const { discountGroupId, discountId } = await Joi.object({
+      discountGroupId: Joi.string().uuid().optional(),
+      discountId: Joi.string().uuid().optional(),
+    })
+      .with('discountGroupId', 'discountId')
+      .validateAsync(props);
+
+    try {
+      const discountClient = InternalClient.getDiscount();
+
+      // 기존에 적용한 할인 쿠폰이 있을 경우, 적용을 해제함
+      if (ride.discountGroupId && ride.discountId) {
+        const { discountGroupId, discountId }: any = await ride;
+        await discountClient
+          .getDiscountGroup(discountGroupId)
+          .then((discountGroup) => discountGroup.getDiscount(discountId))
+          .then((discount) => discount.update({ lockedAt: null }));
+        data.discountGroupId = null;
+        data.discountId = null;
+      }
+
+      if (discountGroupId && discountId) {
+        await discountClient
+          .getDiscountGroup(discountGroupId)
+          .then((discountGroup) => discountGroup.getDiscount(discountId))
+          .then((discount) => discount.update({ lockedAt: new Date() }));
+        data.discountGroupId = discountGroupId;
+        data.discountId = discountId;
+      }
+    } catch (err) {}
+
+    return () => prisma.rideModel.update({ where: { rideId }, data });
   }
 
   public static async checkIsLastRide(ride: RideModel): Promise<boolean> {

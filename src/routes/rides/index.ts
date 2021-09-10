@@ -8,6 +8,7 @@ import {
   getRidesLockRouter,
   getRidesPaymentsRouter,
   PlatformMiddleware,
+  $$$,
 } from '../..';
 
 import { Router } from 'express';
@@ -83,6 +84,19 @@ export function getRidesRouter(): Router {
     RideMiddleware(),
     Wrapper(async (req, res) => {
       await Ride.uploadRidePhoto(req.ride, req.body);
+      res.json({ opcode: OPCODE.SUCCESS });
+    })
+  );
+
+  router.post(
+    '/:rideId/discount',
+    PlatformMiddleware({
+      permissionIds: ['rides.discount'],
+      final: true,
+    }),
+    RideMiddleware(),
+    Wrapper(async (req, res) => {
+      await $$$(Ride.changeDiscount(req.ride, req.body));
       res.json({ opcode: OPCODE.SUCCESS });
     })
   );
