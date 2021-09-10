@@ -27,10 +27,31 @@ const insuranceClient = InternalClient.getInsurance([
   InsurancePermission.INSURANCE_END,
 ]);
 
-interface RideTimeline {
+export interface RideTimeline {
   latitude: number;
   longitude: number;
   battery: number;
+  createdAt: Date;
+}
+
+export interface RideStatus {
+  gps: {
+    latitude: number;
+    longitude: number;
+    satelliteUsedCount: number;
+    isValid: boolean;
+    speed: number;
+  };
+  power: {
+    speedLimit: number;
+    scooter: {
+      battery: number;
+    };
+  };
+  isEnabled: boolean;
+  isLightsOn: boolean;
+  isFallDown: boolean;
+  speed: number;
   createdAt: Date;
 }
 
@@ -470,6 +491,38 @@ export class Ride {
     const kickboard = await kickboardClient.getKickboard(ride.kickboardCode);
     if (enabled) await kickboard.lightOn({ mode: 0, seconds: 0 });
     else kickboard.lightOff();
+  }
+
+  public static async getStatus(ride: RideModel): Promise<RideStatus> {
+    if (ride.terminatedAt) {
+      throw new InternalError('이미 종료된 라이드입니다.', OPCODE.ERROR);
+    }
+
+    const { gps, power, isEnabled, isLightsOn, isFallDown, speed, createdAt } =
+      await kickboardClient
+        .getKickboard(ride.kickboardCode)
+        .then((kickboard) => kickboard.getLatestStatus());
+
+    return {
+      gps: {
+        latitude: gps.latitude,
+        longitude: gps.longitude,
+        satelliteUsedCount: gps.satelliteUsedCount,
+        isValid: gps.isValid,
+        speed: gps.speed,
+      },
+      power: {
+        speedLimit: power.speedLimit,
+        scooter: {
+          battery: power.scooter.battery,
+        },
+      },
+      isEnabled,
+      isLightsOn,
+      isFallDown,
+      speed,
+      createdAt,
+    };
   }
 
   public static async setLock(

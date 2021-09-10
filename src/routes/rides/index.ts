@@ -88,6 +88,19 @@ export function getRidesRouter(): Router {
   );
 
   router.get(
+    '/:rideId/status',
+    PlatformMiddleware({
+      permissionIds: ['rides.status'],
+      final: true,
+    }),
+    RideMiddleware(),
+    Wrapper(async (req, res) => {
+      const status = await Ride.getStatus(req.ride);
+      res.json({ opcode: OPCODE.SUCCESS, status });
+    })
+  );
+
+  router.get(
     '/:rideId',
     PlatformMiddleware({
       permissionIds: ['rides.view'],
