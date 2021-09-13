@@ -96,7 +96,7 @@ export function getRidesRouter(): Router {
     }),
     RideMiddleware(),
     Wrapper(async (req, res) => {
-      await $$$(Ride.changeDiscount(req.ride, req.body));
+      await Ride.changeDiscount(req.ride, req.body);
       res.json({ opcode: OPCODE.SUCCESS });
     })
   );

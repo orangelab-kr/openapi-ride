@@ -7,6 +7,7 @@ import {
 import dayjs from 'dayjs';
 import {
   InsurancePermission,
+  InternalDiscount,
   InternalKickboardMode,
   InternalPlatform,
   WebhookPermission,
@@ -304,7 +305,7 @@ export class Ride {
   public static async changeDiscount(
     ride: RideModel,
     props: { discountGroupId?: string; discountId?: string }
-  ): Promise<() => Prisma.Prisma__RideModelClient<RideModel>> {
+  ): Promise<void> {
     if (ride.terminatedAt) {
       throw new InternalError('이미 종료된 라이드입니다.', OPCODE.ERROR);
     }
@@ -318,31 +319,41 @@ export class Ride {
       .with('discountGroupId', 'discountId')
       .validateAsync(props);
 
-    try {
-      const discountClient = InternalClient.getDiscount();
+    const discountClient = InternalClient.getDiscount();
+    let beforeDiscount: InternalDiscount | undefined;
+    let afterDiscount: InternalDiscount | undefined;
 
-      // 기존에 적용한 할인 쿠폰이 있을 경우, 적용을 해제함
-      if (ride.discountGroupId && ride.discountId) {
-        const { discountGroupId, discountId }: any = await ride;
-        await discountClient
-          .getDiscountGroup(discountGroupId)
-          .then((discountGroup) => discountGroup.getDiscount(discountId))
-          .then((discount) => discount.update({ lockedAt: null }));
-        data.discountGroupId = null;
-        data.discountId = null;
-      }
+    // 기존에 적용한 할인 쿠폰이 있을 경우, 적용을 해제함
+    if (ride.discountGroupId && ride.discountId) {
+      const { discountGroupId, discountId }: any = await ride;
+      beforeDiscount = await discountClient
+        .getDiscountGroup(discountGroupId)
+        .then((discountGroup) => discountGroup.getDiscount(discountId));
+      data.discountGroupId = null;
+      data.discountId = null;
+    }
 
-      if (discountGroupId && discountId) {
-        await discountClient
-          .getDiscountGroup(discountGroupId)
-          .then((discountGroup) => discountGroup.getDiscount(discountId))
-          .then((discount) => discount.update({ lockedAt: new Date() }));
-        data.discountGroupId = discountGroupId;
-        data.discountId = discountId;
-      }
-    } catch (err) {}
+    if (discountGroupId && discountId) {
+      afterDiscount = await discountClient
+        .getDiscountGroup(discountGroupId)
+        .then((discountGroup) => discountGroup.getDiscount(discountId));
+      data.discountGroupId = discountGroupId;
+      data.discountId = discountId;
+    }
 
-    return () => prisma.rideModel.update({ where: { rideId }, data });
+    const transactions: Promise<any>[] = [
+      prisma.rideModel.update({ where: { rideId }, data }),
+    ];
+
+    if (beforeDiscount) {
+      transactions.push(beforeDiscount.update({ lockedAt: null }));
+    }
+
+    if (afterDiscount) {
+      transactions.push(afterDiscount.update({ lockedAt: new Date() }));
+    }
+
+    await Promise.all(transactions);
   }
 
   public static async checkIsLastRide(ride: RideModel): Promise<boolean> {
