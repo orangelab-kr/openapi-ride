@@ -170,8 +170,8 @@ export class Ride {
         })
         .required(),
       birthday: Joi.date().required(),
-      discountGroupId: Joi.string().uuid().optional(),
-      discountId: Joi.string().uuid().optional(),
+      discountGroupId: Joi.string().uuid().allow(null).optional(),
+      discountId: Joi.string().uuid().allow(null).optional(),
       latitude: Joi.number().min(-90).max(90).required(),
       longitude: Joi.number().min(-180).max(180).required(),
     }).with('discountGroupId', 'discountId');
@@ -313,8 +313,8 @@ export class Ride {
     const { rideId } = ride;
     const data: Prisma.RideModelUpdateInput = {};
     const { discountGroupId, discountId } = await Joi.object({
-      discountGroupId: Joi.string().uuid().optional(),
-      discountId: Joi.string().uuid().optional(),
+      discountGroupId: Joi.string().uuid().allow(null).optional(),
+      discountId: Joi.string().uuid().allow(null).optional(),
     })
       .with('discountGroupId', 'discountId')
       .validateAsync(props);
