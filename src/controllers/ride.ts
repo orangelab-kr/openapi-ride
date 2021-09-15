@@ -93,6 +93,7 @@ export class Ride {
         .valid('price', 'startedAt', 'terminatedAt', 'createdAt', 'updatedAt')
         .default('startedAt')
         .optional(),
+      showTerminated: Joi.boolean().default(true).optional(),
       orderBySort: Joi.string().valid('asc', 'desc').default('desc').optional(),
     });
 
@@ -109,6 +110,7 @@ export class Ride {
       endedAt,
       orderByField,
       orderBySort,
+      showTerminated,
     } = await schema.validateAsync(props);
     const orderBy = { [orderByField]: orderBySort };
     const where: Prisma.RideModelWhereInput = {
@@ -132,6 +134,7 @@ export class Ride {
     if (regionId) where.regionId = regionId;
     if (discountGroupId) where.discountGroupId = discountGroupId;
     if (terminatedType) where.terminatedType = terminatedType;
+    if (!showTerminated) where.terminatedAt = null;
     const [total, rides] = await prisma.$transaction([
       prisma.rideModel.count({ where }),
       prisma.rideModel.findMany({
