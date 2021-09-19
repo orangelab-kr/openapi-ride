@@ -205,7 +205,7 @@ export class Pricing {
     if (discountMinute > removedMinute) discountMinute = removedMinute;
     receiptUnit.price = removedMinute * perMinutePrice;
     receiptUnit.discount = discountMinute * perMinutePrice;
-    if (discountGroup && discountGroup.isPerMinuteIncluded) {
+    if (discountGroup && discountGroup.isPerMinutePriceIncluded) {
       // 퍼센티지 할인
       if (discountGroup.ratioPriceDiscount) {
         receiptUnit.discount =
@@ -237,7 +237,7 @@ export class Pricing {
       : pricing.standardPrice;
 
     receiptUnit.price = standardPrice;
-    if (discountGroup && discountGroup.isStandardIncluded) {
+    if (discountGroup && discountGroup.isStandardPriceIncluded) {
       // 퍼센티지 할인
       if (discountGroup.ratioPriceDiscount) {
         receiptUnit.discount =

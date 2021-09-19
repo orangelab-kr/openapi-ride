@@ -1554,10 +1554,10 @@ one-time@^1.0.0:
   dependencies:
     fn.name "1.x.x"
 
-openapi-internal-sdk@^1.6.5:
-  version "1.6.5"
-  resolved "https://hikick-547032093617.d.codeartifact.ap-northeast-1.amazonaws.com:443/npm/hikick/openapi-internal-sdk/-/openapi-internal-sdk-1.6.5.tgz#6f74b017269fed08d4d445d30b9d077784187f2f"
-  integrity sha512-UHnWItESbkTjSPBU3TMFRqH76MezHx7B4oDrPqQqJZH5AA7OiTTagV6MWaTC2lW/nLlJzwxt9IVFW77AiNMsLg==
+openapi-internal-sdk@^1.6.6:
+  version "1.6.6"
+  resolved "https://hikick-547032093617.d.codeartifact.ap-northeast-1.amazonaws.com:443/npm/hikick/openapi-internal-sdk/-/openapi-internal-sdk-1.6.6.tgz#3e1e98c38dd46882a49eca755ee3062972c9ce0c"
+  integrity sha512-bC9czAztjY6a//D7C4RTwYnNCaykNfVr1EO+RGvXuWUsOOhe1mzTvuPn3OPlTlxg7PmHa4GfKXQ6bHro09AHbw==
   dependencies:
     axios "^0.21.1"
     jsonwebtoken "^8.5.1"
