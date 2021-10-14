@@ -1,5 +1,5 @@
 import {
-  OPCODE,
+  RESULT,
   Payment,
   PaymentMiddleware,
   PlatformMiddleware,
@@ -17,9 +17,9 @@ export function getRidesPaymentsRouter(): Router {
       permissionIds: ['rides.payments.list'],
       final: true,
     }),
-    Wrapper(async (req, res) => {
+    Wrapper(async (req) => {
       const payments = await Payment.getPaymentsByRide(req.ride);
-      res.json({ opcode: OPCODE.SUCCESS, payments });
+      throw RESULT.SUCCESS({ details: { payments } });
     })
   );
 
@@ -30,9 +30,9 @@ export function getRidesPaymentsRouter(): Router {
       final: true,
     }),
     PaymentMiddleware(),
-    Wrapper(async (req, res) => {
+    Wrapper(async (req) => {
       const { payment } = req;
-      res.json({ opcode: OPCODE.SUCCESS, payment });
+      throw RESULT.SUCCESS({ details: { payment } });
     })
   );
 
@@ -43,10 +43,10 @@ export function getRidesPaymentsRouter(): Router {
       final: true,
     }),
     PaymentMiddleware(),
-    Wrapper(async (req, res) => {
+    Wrapper(async (req) => {
       const { payment } = req;
       await Payment.setProcessed(payment);
-      res.json({ opcode: OPCODE.SUCCESS });
+      throw RESULT.SUCCESS();
     })
   );
 
@@ -56,10 +56,10 @@ export function getRidesPaymentsRouter(): Router {
       permissionIds: ['rides.payments.create'],
       final: true,
     }),
-    Wrapper(async (req, res) => {
+    Wrapper(async (req) => {
       const { ride, body } = req;
       const payment = await Payment.addPayment(ride, body);
-      res.json({ opcode: OPCODE.SUCCESS, payment });
+      throw RESULT.SUCCESS({ details: { payment } });
     })
   );
 
@@ -69,9 +69,9 @@ export function getRidesPaymentsRouter(): Router {
       permissionIds: ['rides.payments.refund'],
       final: true,
     }),
-    Wrapper(async (req, res) => {
+    Wrapper(async (req) => {
       await Payment.refundAllPayment(req.ride);
-      res.json({ opcode: OPCODE.SUCCESS });
+      throw RESULT.SUCCESS();
     })
   );
 
@@ -82,9 +82,9 @@ export function getRidesPaymentsRouter(): Router {
       final: true,
     }),
     PaymentMiddleware(),
-    Wrapper(async (req, res) => {
+    Wrapper(async (req) => {
       await Payment.refundPayment(req.ride, req.payment);
-      res.json({ opcode: OPCODE.SUCCESS });
+      throw RESULT.SUCCESS();
     })
   );
 

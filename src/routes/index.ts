@@ -4,9 +4,9 @@ import {
   getInternalRouter,
   getRidesRouter,
   InternalMiddleware,
-  OPCODE,
   Payment,
   PlatformMiddleware,
+  RESULT,
   Wrapper,
 } from '..';
 
@@ -20,11 +20,8 @@ export function getRouter(): Router {
   router.use('/internal', InternalMiddleware(), getInternalRouter());
   router.get(
     '/',
-    Wrapper(async (_req, res) => {
-      res.json({
-        opcode: OPCODE.SUCCESS,
-        ...clusterInfo,
-      });
+    Wrapper(async (req) => {
+      throw RESULT.SUCCESS({ details: clusterInfo });
     })
   );
 
@@ -34,11 +31,11 @@ export function getRouter(): Router {
       permissionIds: ['rides.payments.all'],
       final: true,
     }),
-    Wrapper(async (req, res) => {
+    Wrapper(async (req) => {
       const { query } = req;
       query.platformId = req.loggined.platform.platformId;
       const { payments, total } = await Payment.getPayments(query);
-      res.json({ opcode: OPCODE.SUCCESS, payments, total });
+      throw RESULT.SUCCESS({ details: { payments, total } });
     })
   );
 

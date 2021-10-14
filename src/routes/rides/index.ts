@@ -1,5 +1,5 @@
 import {
-  OPCODE,
+  RESULT,
   Pricing,
   Ride,
   RideMiddleware,
@@ -55,11 +55,11 @@ export function getRidesRouter(): Router {
       permissionIds: ['rides.list'],
       final: true,
     }),
-    Wrapper(async (req, res) => {
+    Wrapper(async (req) => {
       const { query } = req;
       query.platformId = req.loggined.platform.platformId;
       const { total, rides } = await Ride.getRides(query);
-      res.json({ opcode: OPCODE.SUCCESS, rides, total });
+      throw RESULT.SUCCESS({ details: { rides, total } });
     })
   );
 
@@ -69,9 +69,9 @@ export function getRidesRouter(): Router {
       permissionIds: ['rides.start'],
       final: true,
     }),
-    Wrapper(async (req, res) => {
+    Wrapper(async (req) => {
       const { rideId } = await Ride.startRide(req.loggined.platform, req.body);
-      res.json({ opcode: OPCODE.SUCCESS, rideId });
+      throw RESULT.SUCCESS({ details: { rideId } });
     })
   );
 
@@ -82,9 +82,9 @@ export function getRidesRouter(): Router {
       final: true,
     }),
     RideMiddleware(),
-    Wrapper(async (req, res) => {
+    Wrapper(async (req) => {
       await Ride.uploadRidePhoto(req.ride, req.body);
-      res.json({ opcode: OPCODE.SUCCESS });
+      throw RESULT.SUCCESS();
     })
   );
 
@@ -95,9 +95,9 @@ export function getRidesRouter(): Router {
       final: true,
     }),
     RideMiddleware(),
-    Wrapper(async (req, res) => {
+    Wrapper(async (req) => {
       await Ride.changeDiscount(req.ride, req.body);
-      res.json({ opcode: OPCODE.SUCCESS });
+      throw RESULT.SUCCESS();
     })
   );
 
@@ -108,9 +108,9 @@ export function getRidesRouter(): Router {
       final: true,
     }),
     RideMiddleware(),
-    Wrapper(async (req, res) => {
+    Wrapper(async (req) => {
       const status = await Ride.getStatus(req.ride);
-      res.json({ opcode: OPCODE.SUCCESS, status });
+      throw RESULT.SUCCESS({ details: { status } });
     })
   );
 
@@ -121,9 +121,9 @@ export function getRidesRouter(): Router {
       final: true,
     }),
     RideMiddleware(),
-    Wrapper(async (req, res) => {
+    Wrapper(async (req) => {
       const { ride } = req;
-      res.json({ opcode: OPCODE.SUCCESS, ride });
+      throw RESULT.SUCCESS({ details: { ride } });
     })
   );
 
@@ -134,9 +134,9 @@ export function getRidesRouter(): Router {
       final: true,
     }),
     RideMiddleware(),
-    Wrapper(async (req, res) => {
+    Wrapper(async (req) => {
       await Ride.terminateRide(req.ride, req.query);
-      res.json({ opcode: OPCODE.SUCCESS });
+      throw RESULT.SUCCESS();
     })
   );
 
@@ -147,10 +147,10 @@ export function getRidesRouter(): Router {
       final: true,
     }),
     RideMiddleware(),
-    Wrapper(async (req, res) => {
+    Wrapper(async (req) => {
       const { ride, query } = req;
       const pricing = await Pricing.getPricingByRide(ride, query as any);
-      res.json({ opcode: OPCODE.SUCCESS, pricing });
+      throw RESULT.SUCCESS({ details: { pricing } });
     })
   );
 
@@ -161,9 +161,9 @@ export function getRidesRouter(): Router {
       final: true,
     }),
     RideMiddleware(),
-    Wrapper(async (req, res) => {
+    Wrapper(async (req) => {
       const timeline = await Ride.getTimeline(req.ride);
-      res.json({ opcode: OPCODE.SUCCESS, timeline });
+      throw RESULT.SUCCESS({ details: { timeline } });
     })
   );
 

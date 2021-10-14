@@ -1,6 +1,6 @@
-import { Database, InternalClient, Joi } from '../tools';
-import { InternalError, OPCODE, WebhookPermission } from 'openapi-internal-sdk';
 import { PaymentModel, PaymentType, Prisma, RideModel } from '@prisma/client';
+import { WebhookPermission } from 'openapi-internal-sdk';
+import { Database, InternalClient, Joi, RESULT } from '../tools';
 
 const { prisma } = Database;
 
@@ -218,13 +218,7 @@ export class Payment {
     paymentId: string
   ): Promise<PaymentModel> {
     const payment = await this.getPayment(ride, paymentId);
-    if (!payment) {
-      throw new InternalError(
-        '해당 결제 내역을 찾을 수 없습니다.',
-        OPCODE.NOT_FOUND
-      );
-    }
-
+    if (!payment) throw RESULT.CANNOT_FIND_PAYMENT();
     return payment;
   }
 

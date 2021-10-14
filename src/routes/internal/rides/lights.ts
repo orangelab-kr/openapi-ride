@@ -1,4 +1,4 @@
-import { OPCODE, Ride, Wrapper } from '../../..';
+import { RESULT, Ride, Wrapper } from '../../..';
 
 import { Router } from 'express';
 
@@ -7,17 +7,17 @@ export function getInternalRidesLightsRouter(): Router {
 
   router.get(
     '/on',
-    Wrapper(async (req, res) => {
+    Wrapper(async (req) => {
       await Ride.setLights(req.internal.ride, true);
-      res.json({ opcode: OPCODE.SUCCESS });
+      throw RESULT.SUCCESS();
     })
   );
 
   router.get(
     '/off',
-    Wrapper(async (req, res) => {
+    Wrapper(async (req) => {
       await Ride.setLights(req.internal.ride, false);
-      res.json({ opcode: OPCODE.SUCCESS });
+      throw RESULT.SUCCESS();
     })
   );
 

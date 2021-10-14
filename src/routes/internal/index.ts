@@ -1,6 +1,6 @@
 import {
   InternalPermissionMiddleware,
-  OPCODE,
+  RESULT,
   PERMISSION,
   Payment,
   Wrapper,
@@ -19,10 +19,10 @@ export function getInternalRouter(): Router {
   router.get(
     '/payments',
     InternalPermissionMiddleware(PERMISSION.PAYMENT_LIST),
-    Wrapper(async (req, res) => {
+    Wrapper(async (req) => {
       const { query } = req;
       const { payments, total } = await Payment.getPayments(query);
-      res.json({ opcode: OPCODE.SUCCESS, payments, total });
+      throw RESULT.SUCCESS({ details: { payments, total } });
     })
   );
 

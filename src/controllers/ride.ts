@@ -13,7 +13,7 @@ import {
   WebhookPermission,
 } from 'openapi-internal-sdk';
 import { Payment } from '.';
-import { InternalError, Joi, OPCODE, Pricing } from '..';
+import { Joi, Pricing, RESULT } from '..';
 import { Database, InternalClient } from '../tools';
 
 const { prisma } = Database;
@@ -204,7 +204,7 @@ export class Ride {
     const kickboardCode = code.toUpperCase();
     const kickboard = await kickboardClient.getKickboard(kickboardCode);
     if (kickboard.mode !== InternalKickboardMode.READY) {
-      throw new InternalError('사용중인 킥보드입니다.', OPCODE.ERROR);
+      throw RESULT.ALREADY_USING_KICKBOARD();
     }
 
     const { gps } = await kickboard.getLatestStatus();
@@ -271,25 +271,10 @@ export class Ride {
 
     const { photo } = await schema.validateAsync(props);
     const { kickboardCode, terminatedAt } = ride;
-    if (!terminatedAt) {
-      throw new InternalError(
-        '반납 사진은 반납 후에 업로드할 수 있습니다.',
-        OPCODE.ERROR
-      );
-    }
-
+    if (ride.photo) throw RESULT.ALREADY_PHOTO_UPLOAD();
+    if (!terminatedAt) throw RESULT.PHOTO_UPLOAD_NOT_TERMINATE();
     if (dayjs(terminatedAt).add(30, 'minutes').isBefore(dayjs())) {
-      throw new InternalError(
-        '반납 사진은 반납 후 30분 이내로만 업로드 가능합니다.',
-        OPCODE.EXCESS_LIMITS
-      );
-    }
-
-    if (ride.photo) {
-      throw new InternalError(
-        '이미 반납 사진을 업로드했습니다.',
-        OPCODE.ALREADY_EXISTS
-      );
+      throw RESULT.PHOTO_UPLOAD_TIMEOUT();
     }
 
     const { rideId } = ride;
@@ -309,9 +294,7 @@ export class Ride {
     ride: RideModel,
     props: { discountGroupId?: string; discountId?: string }
   ): Promise<void> {
-    if (ride.terminatedAt) {
-      throw new InternalError('이미 종료된 라이드입니다.', OPCODE.ERROR);
-    }
+    if (ride.terminatedAt) throw RESULT.ALREADY_TERMINATED_RIDE();
 
     const { rideId } = ride;
     const data: Prisma.RideModelUpdateInput = {};
@@ -379,10 +362,7 @@ export class Ride {
       terminatedAt?: Date;
     }
   ): Promise<void> {
-    if (ride.terminatedAt) {
-      throw new InternalError('이미 종료된 라이드입니다.', OPCODE.ERROR);
-    }
-
+    if (ride.terminatedAt) throw RESULT.ALREADY_TERMINATED_RIDE();
     const schema = Joi.object({
       latitude: Joi.number().min(-90).max(90).optional(),
       longitude: Joi.number().min(-180).max(180).optional(),
@@ -430,7 +410,7 @@ export class Ride {
         await insuranceClient
           .getInsurance(insuranceId)
           .then((insurance) => insurance.end({ endedAt: terminatedAt }));
-      } catch (err) {}
+      } catch (err: any) {}
     }
 
     const pricing = await Pricing.getPricingByRide(ride, {
@@ -479,13 +459,7 @@ export class Ride {
     platform?: InternalPlatform
   ): Promise<RideModel> {
     const ride = await this.getRide(rideId, platform);
-    if (!ride) {
-      throw new InternalError(
-        '해당 라이드를 찾을 수 없습니다.',
-        OPCODE.NOT_FOUND
-      );
-    }
-
+    if (!ride) throw RESULT.CANNOT_FIND_RIDE();
     return ride;
   }
 
@@ -541,20 +515,14 @@ export class Ride {
     ride: RideModel,
     enabled: boolean
   ): Promise<void> {
-    if (ride.terminatedAt) {
-      throw new InternalError('이미 종료된 라이드입니다.', OPCODE.ERROR);
-    }
-
+    if (ride.terminatedAt) throw RESULT.ALREADY_TERMINATED_RIDE();
     const kickboard = await kickboardClient.getKickboard(ride.kickboardCode);
     if (enabled) await kickboard.lightOn({ mode: 0, seconds: 0 });
     else kickboard.lightOff();
   }
 
   public static async getStatus(ride: RideModel): Promise<RideStatus> {
-    if (ride.terminatedAt) {
-      throw new InternalError('이미 종료된 라이드입니다.', OPCODE.ERROR);
-    }
-
+    if (ride.terminatedAt) throw RESULT.ALREADY_TERMINATED_RIDE();
     const { gps, power, isEnabled, isLightsOn, isFallDown, speed, createdAt } =
       await kickboardClient
         .getKickboard(ride.kickboardCode)
@@ -586,10 +554,7 @@ export class Ride {
     ride: RideModel,
     enabled: boolean
   ): Promise<void> {
-    if (ride.terminatedAt) {
-      throw new InternalError('이미 종료된 라이드입니다.', OPCODE.ERROR);
-    }
-
+    if (ride.terminatedAt) throw RESULT.ALREADY_TERMINATED_RIDE();
     const kickboard = await kickboardClient.getKickboard(ride.kickboardCode);
     if (enabled) await kickboard.lock();
     else kickboard.unlock();

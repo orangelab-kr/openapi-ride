@@ -6,7 +6,7 @@ import {
   getInternalRidesPaymentsRouter,
   InternalPermissionMiddleware,
   InternalRideMiddleware,
-  OPCODE,
+  RESULT,
   PERMISSION,
   Pricing,
   Ride,
@@ -48,20 +48,20 @@ export function getInternalRidesRouter(): Router {
   router.get(
     '/',
     InternalPermissionMiddleware(PERMISSION.RIDE_LIST),
-    Wrapper(async (req, res) => {
+    Wrapper(async (req) => {
       const { query } = req;
       const { total, rides } = await Ride.getRides(query);
-      res.json({ opcode: OPCODE.SUCCESS, rides, total });
+      throw RESULT.SUCCESS({ details: { rides, total } });
     })
   );
 
   router.post(
     '/',
-    Wrapper(async (req, res) => {
+    Wrapper(async (req) => {
       const { body } = req;
       const platform = await platformClient.getPlatform(body.platformId);
       const { rideId } = await Ride.startRide(platform, body);
-      res.json({ opcode: OPCODE.SUCCESS, rideId });
+      throw RESULT.SUCCESS({ details: { rideId } });
     })
   );
 
@@ -69,10 +69,10 @@ export function getInternalRidesRouter(): Router {
     '/:rideId',
     InternalPermissionMiddleware(PERMISSION.RIDE_TERMINATE),
     InternalRideMiddleware(),
-    Wrapper(async (req, res) => {
+    Wrapper(async (req) => {
       const { query, internal } = req;
       await Ride.terminateRide(internal.ride, query);
-      res.json({ opcode: OPCODE.SUCCESS });
+      throw RESULT.SUCCESS();
     })
   );
 
@@ -80,19 +80,19 @@ export function getInternalRidesRouter(): Router {
     '/:rideId',
     InternalPermissionMiddleware(PERMISSION.RIDE_DETAILS),
     InternalRideMiddleware(),
-    Wrapper(async (req, res) => {
+    Wrapper(async (req) => {
       const { ride } = req.internal;
-      res.json({ opcode: OPCODE.SUCCESS, ride });
+      throw RESULT.SUCCESS({ details: { ride } });
     })
   );
 
   router.post(
     '/:rideId/photo',
     InternalRideMiddleware(),
-    Wrapper(async (req, res) => {
+    Wrapper(async (req) => {
       const { internal, body } = req;
       await Ride.uploadRidePhoto(internal.ride, body);
-      res.json({ opcode: OPCODE.SUCCESS });
+      throw RESULT.SUCCESS();
     })
   );
 
@@ -100,14 +100,14 @@ export function getInternalRidesRouter(): Router {
     '/:rideId/pricing',
     InternalPermissionMiddleware(PERMISSION.RIDE_PRICING),
     InternalRideMiddleware(),
-    Wrapper(async (req, res) => {
+    Wrapper(async (req) => {
       const { internal, query } = req;
       const pricing = await Pricing.getPricingByRide(
         internal.ride,
         query as any
       );
 
-      res.json({ opcode: OPCODE.SUCCESS, pricing });
+      throw RESULT.SUCCESS({ details: { pricing } });
     })
   );
 
@@ -115,9 +115,9 @@ export function getInternalRidesRouter(): Router {
     '/:rideId/timeline',
     InternalPermissionMiddleware(PERMISSION.RIDE_TIMELINE),
     InternalRideMiddleware(),
-    Wrapper(async (req, res) => {
+    Wrapper(async (req) => {
       const timeline = await Ride.getTimeline(req.internal.ride);
-      res.json({ opcode: OPCODE.SUCCESS, timeline });
+      throw RESULT.SUCCESS({ details: { timeline } });
     })
   );
 

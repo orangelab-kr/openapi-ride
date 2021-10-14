@@ -1,0 +1,16 @@
+{
+  "REQUIRED_ACCESS_KEY": "This service requires authentication.",
+  "EXPIRED_ACCESS_KEY": "Your access token has expired.",
+  "PERMISSION_DENIED": "You do not have permission. (%s)",
+  "INVALID_ERROR": "An unknown error has occurred.",
+  "FAILED_VALIDATE": "Please enter the correct information.",
+  "INVALID_API": "Invalid API address.",
+  "CANNOT_FIND_PAYMENT": "Payment history does not exist.",
+  "INVALID_TERMINATE_TIME": "The end point cannot be earlier than the start point.",
+  "ALREADY_USING_KICKBOARD": "This is a kickboard already in use.",
+  "PHOTO_UPLOAD_NOT_TERMINATE": "Return photos can be uploaded after the ride is over.",
+  "PHOTO_UPLOAD_TIMEOUT": "Return photos can only be uploaded within 30 minutes of the end of the ride.",
+  "ALREADY_PHOTO_UPLOAD": "You have already uploaded a return photo.",
+  "ALREADY_TERMINATED_RIDE": "The ride has already ended.",
+  "CANNOT_FIND_RIDE": "Ride history does not exist."
+}

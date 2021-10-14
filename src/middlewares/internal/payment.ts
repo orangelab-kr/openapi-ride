@@ -1,14 +1,11 @@
-import { Callback, InternalError, OPCODE, Payment, Wrapper } from '../..';
+import { WrapperCallback, Payment, RESULT, Wrapper } from '../..';
 
-export function PaymentMiddleware(): Callback {
+export function PaymentMiddleware(): WrapperCallback {
   return Wrapper(async (req, res, next) => {
     const { paymentId } = req.params;
     const { ride } = req;
     if (!ride || typeof paymentId !== 'string') {
-      throw new InternalError(
-        '해당 결제 기록을 찾을 수 없습니다.',
-        OPCODE.NOT_FOUND
-      );
+      throw RESULT.CANNOT_FIND_PAYMENT();
     }
 
     req.payment = await Payment.getPaymentOrThrow(ride, paymentId);

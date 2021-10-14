@@ -1,16 +1,13 @@
+import { Prisma, RideModel } from '@prisma/client';
+import dayjs from 'dayjs';
 import {
   DiscountPermission,
   InternalDiscountGroup,
-  InternalError,
   InternalLocationPricing,
   InternalLocationProfile,
   LocationPermission,
-  OPCODE,
 } from 'openapi-internal-sdk';
-import { InternalClient, Joi } from '../tools';
-import { Prisma, RideModel } from '@prisma/client';
-
-import dayjs from 'dayjs';
+import { InternalClient, Joi, RESULT } from '../tools';
 
 const locationClient = InternalClient.getLocation([
   LocationPermission.GEOFENCES_LOCATION,
@@ -65,13 +62,7 @@ export class Pricing {
 
     const currentDate = dayjs(terminatedAt || undefined);
     const minutes = currentDate.diff(dayjs(startedAt), 'minutes');
-    if (minutes < 0) {
-      throw new InternalError(
-        '종료 시점이 시작 시점보다 빠를 수 없습니다.',
-        OPCODE.ERROR
-      );
-    }
-
+    if (minutes < 0) throw RESULT.INVALID_TERMINATE_TIME();
     return this.calculatePricing({
       latitude,
       longitude,

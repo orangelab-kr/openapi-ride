@@ -1,6 +1,6 @@
-import { Callback, logger, Wrapper } from '..';
+import { WrapperCallback, logger, Wrapper } from '..';
 
-export function LoggerMiddleware(): Callback {
+export function LoggerMiddleware(): WrapperCallback {
   return Wrapper(async (req, res, next) => {
     const startedAt = Date.now();
     const method = req.method;
@@ -23,7 +23,7 @@ export function LoggerMiddleware(): Callback {
 (SC: ${statusCode}, IP: "${ipAddress}", UA: "${userAgent}", CL: ${contentLength})`
         );
       } else {
-        logger.info(`[${httpVersion}] ${method} ${url} - ${time}`);
+        logger.info(`${httpVersion} / ${method} ${url} - ${time}`);
         logger.info(`- Status Code: ${statusCode}`);
         logger.info(`- IP Address: ${ipAddress}`);
         logger.info(`- User Agent: ${userAgent}`);
