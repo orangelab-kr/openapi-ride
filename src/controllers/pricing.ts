@@ -7,11 +7,7 @@ import {
   InternalLocationProfile,
   LocationPermission,
 } from 'openapi-internal-sdk';
-import { InternalClient, Joi, RESULT } from '../tools';
-
-const locationClient = InternalClient.getLocation([
-  LocationPermission.GEOFENCES_LOCATION,
-]);
+import { InternalClient, Joi, RESULT } from '..';
 
 type ReceiptUnit = Prisma.ReceiptUnitModelCreateInput;
 type Receipt = Prisma.ReceiptModelCreateInput & {
@@ -19,11 +15,6 @@ type Receipt = Prisma.ReceiptModelCreateInput & {
   perMinute: ReceiptUnit;
   surcharge: ReceiptUnit;
 };
-
-const discountClient = InternalClient.getDiscount([
-  DiscountPermission.DISCOUNT_GROUP_VIEW,
-  DiscountPermission.DISCOUNT_VIEW,
-]);
 
 export const DefaultPricingResult: Receipt = {
   standard: { price: 0, discount: 0, total: 0 },
@@ -123,6 +114,10 @@ export class Pricing {
     })
       .with('discountGroupId', 'discountId')
       .validateAsync(props);
+    const locationClient = InternalClient.getLocation([
+      LocationPermission.GEOFENCES_LOCATION,
+    ]);
+
     const location = await locationClient.getGeofenceByLocation({ lat, lng });
     const [pricing, profile] = await Promise.all([
       location.getRegion().then((region) => region.getPricing()),
@@ -131,7 +126,11 @@ export class Pricing {
 
     let discountGroup;
     if (discountGroupId && discountId) {
-      discountGroup = await discountClient.getDiscountGroup(discountGroupId);
+      discountGroup = await InternalClient.getDiscount([
+        DiscountPermission.DISCOUNT_GROUP_VIEW,
+        DiscountPermission.DISCOUNT_VIEW,
+      ]).getDiscountGroup(discountGroupId);
+
       await discountGroup.getDiscount(discountId);
     }
 

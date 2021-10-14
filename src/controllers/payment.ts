@@ -1,12 +1,6 @@
 import { PaymentModel, PaymentType, Prisma, RideModel } from '@prisma/client';
 import { WebhookPermission } from 'openapi-internal-sdk';
-import { Database, InternalClient, Joi, RESULT } from '../tools';
-
-const { prisma } = Database;
-
-const webhookClient = InternalClient.getWebhook([
-  WebhookPermission.REQUESTS_SEND,
-]);
+import { InternalClient, Joi, prisma, RESULT } from '..';
 
 export class Payment {
   public static async getPayments(props: {
@@ -200,6 +194,10 @@ export class Payment {
   }
 
   public static async sendPaymentWebhook(payment: PaymentModel): Promise<void> {
+    const webhookClient = InternalClient.getWebhook([
+      WebhookPermission.REQUESTS_SEND,
+    ]);
+
     await webhookClient.request(payment.platformId, {
       type: 'payment',
       data: payment,
@@ -207,6 +205,10 @@ export class Payment {
   }
 
   public static async sendRefundWebhook(payment: PaymentModel): Promise<void> {
+    const webhookClient = InternalClient.getWebhook([
+      WebhookPermission.REQUESTS_SEND,
+    ]);
+
     await webhookClient.request(payment.platformId, {
       type: 'refund',
       data: payment,

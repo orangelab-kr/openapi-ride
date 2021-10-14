@@ -4,23 +4,19 @@ import {
   getInternalRidesLightsRouter,
   getInternalRidesLockRouter,
   getInternalRidesPaymentsRouter,
+  InternalClient,
   InternalPermissionMiddleware,
   InternalRideMiddleware,
-  RESULT,
   PERMISSION,
   Pricing,
+  RESULT,
   Ride,
   Wrapper,
 } from '../../..';
-import { InternalClient } from '../../../tools';
 
 export * from './lights';
 export * from './lock';
 export * from './payments';
-
-const platformClient = InternalClient.getPlatform([
-  PlatformPermission.PLATFORMS_VIEW,
-]);
 
 export function getInternalRidesRouter(): Router {
   const router = Router();
@@ -59,6 +55,10 @@ export function getInternalRidesRouter(): Router {
     '/',
     Wrapper(async (req) => {
       const { body } = req;
+      const platformClient = InternalClient.getPlatform([
+        PlatformPermission.PLATFORMS_VIEW,
+      ]);
+
       const platform = await platformClient.getPlatform(body.platformId);
       const { rideId } = await Ride.startRide(platform, body);
       throw RESULT.SUCCESS({ details: { rideId } });

@@ -1,41 +1,37 @@
 import { PrismaClient } from '@prisma/client';
 
-export class Database {
-  public static prisma = new PrismaClient();
+declare global {
+  // eslint-disable-next-line no-var
+  var prisma: PrismaClient | undefined;
+}
 
-  public static initPrisma(): void {
-    Database.prisma.$use(async (params, next) => {
-      const bypassSoftDeleted: string[] = [];
-      if (params.model && !bypassSoftDeleted.includes(params.model)) {
-        if (!['create', 'update', 'upsert'].includes(params.action)) {
-          if (!params.args.where) {
-            params.args.where = {};
-          }
+function createPrismaClient(): PrismaClient {
+  if (global.prisma) return global.prisma;
+  const prisma = new PrismaClient();
 
-          if (!params.args.where['deletedAt']) {
-            params.args.where['deletedAt'] = null;
-          }
-        }
-
-        if (['delete', 'deleteMany'].includes(params.action)) {
-          switch (params.action) {
-            case 'delete':
-              params.action = 'update';
-              break;
-            case 'deleteMany':
-              params.action = 'updateMany';
-              break;
-          }
-
-          if (!params.args.data) {
-            params.args.data = {};
-          }
-
-          params.args.data['deletedAt'] = new Date();
+  prisma.$use(async (params, next) => {
+    const bypassSoftDeleted: string[] = ['PermissionModel'];
+    if (params.model && !bypassSoftDeleted.includes(params.model)) {
+      if (!['create', 'update', 'upsert', 'delete'].includes(params.action)) {
+        if (!params.args.where) params.args.where = {};
+        if (!params.args.where['deletedAt']) {
+          params.args.where['deletedAt'] = null;
         }
       }
 
-      return next(params);
-    });
-  }
+      if (['delete', 'deleteMany'].includes(params.action)) {
+        if (params.action === 'delete') params.action = 'update';
+        if (params.action === 'deleteMany') params.action = 'updateMany';
+        if (!params.args.data) params.args.data = {};
+        params.args.data['deletedAt'] = new Date();
+      }
+    }
+
+    return next(params);
+  });
+
+  global.prisma = prisma;
+  return prisma;
 }
+
+export const prisma = createPrismaClient();

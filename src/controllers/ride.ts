@@ -12,21 +12,7 @@ import {
   InternalPlatform,
   WebhookPermission,
 } from 'openapi-internal-sdk';
-import { Payment } from '.';
-import { Joi, Pricing, RESULT } from '..';
-import { Database, InternalClient } from '../tools';
-
-const { prisma } = Database;
-const kickboardClient = InternalClient.getKickboard();
-const webhookClient = InternalClient.getWebhook([
-  WebhookPermission.REQUESTS_SEND,
-]);
-
-const insuranceClient = InternalClient.getInsurance([
-  InsurancePermission.INSURANCE_START,
-  InsurancePermission.INSURANCE_VIEW,
-  InsurancePermission.INSURANCE_END,
-]);
+import { InternalClient, Joi, Payment, Pricing, prisma, RESULT } from '..';
 
 export interface RideTimeline {
   latitude: number;
@@ -202,7 +188,10 @@ export class Ride {
     } = await schema.validateAsync(props);
     const { platformId } = platform;
     const kickboardCode = code.toUpperCase();
-    const kickboard = await kickboardClient.getKickboard(kickboardCode);
+    const kickboard = await InternalClient.getKickboard().getKickboard(
+      kickboardCode
+    );
+
     if (kickboard.mode !== InternalKickboardMode.READY) {
       throw RESULT.ALREADY_USING_KICKBOARD();
     }
@@ -219,6 +208,10 @@ export class Ride {
         .then((discountGroup) => discountGroup.getDiscount(discountId))
         .then((discount) => discount.update({ lockedAt: new Date() }));
     }
+
+    const insuranceClient = InternalClient.getInsurance([
+      InsurancePermission.INSURANCE_START,
+    ]);
 
     const { insuranceId } = await insuranceClient.start({
       provider: 'mertizfire',
@@ -285,7 +278,7 @@ export class Ride {
 
     const isLastRide = await this.checkIsLastRide(ride);
     if (!isLastRide) return;
-    await kickboardClient
+    await InternalClient.getKickboard()
       .getKickboard(kickboardCode)
       .then((kickboard) => kickboard.setPhoto(photo));
   }
@@ -385,14 +378,15 @@ export class Ride {
       terminatedAt: Date;
     } = await schema.validateAsync(props);
     const { kickboardCode, discountGroupId, discountId, insuranceId } = ride;
+    const kickboardClient = InternalClient.getKickboard();
     const kickboard = await kickboardClient.getKickboard(kickboardCode);
+
     const { gps } = await kickboard.getLatestStatus();
     await kickboard.lightOff();
     await kickboard.stop();
 
     if (discountGroupId && discountId) {
-      const discountClient = InternalClient.getDiscount();
-      await discountClient
+      await InternalClient.getDiscount()
         .getDiscountGroup(discountGroupId)
         .then((discountGroup) => discountGroup.getDiscount(discountId))
         .then((discount) => discount.update({ usedAt: new Date() }));
@@ -404,6 +398,11 @@ export class Ride {
     const terminatedKickboardLocation = {
       create: { latitude: gps.latitude, longitude: gps.longitude },
     };
+
+    const insuranceClient = InternalClient.getInsurance([
+      InsurancePermission.INSURANCE_END,
+      InsurancePermission.INSURANCE_VIEW,
+    ]);
 
     if (insuranceId) {
       try {
@@ -464,6 +463,10 @@ export class Ride {
   }
 
   public static async sendEndWebhook(ride: RideModel): Promise<void> {
+    const webhookClient = InternalClient.getWebhook([
+      WebhookPermission.REQUESTS_SEND,
+    ]);
+
     await webhookClient.request(ride.platformId, {
       type: 'rideEnd',
       data: ride,
@@ -497,7 +500,7 @@ export class Ride {
 
   public static async getTimeline(ride: RideModel): Promise<RideTimeline[]> {
     const endedAt = ride.terminatedAt || new Date();
-    const timeline = await kickboardClient
+    const timeline = await InternalClient.getKickboard()
       .getKickboard(ride.kickboardCode)
       .then((kickboard) =>
         kickboard.getLatestStatusTimeline(ride.startedAt, endedAt)
@@ -516,6 +519,7 @@ export class Ride {
     enabled: boolean
   ): Promise<void> {
     if (ride.terminatedAt) throw RESULT.ALREADY_TERMINATED_RIDE();
+    const kickboardClient = InternalClient.getKickboard();
     const kickboard = await kickboardClient.getKickboard(ride.kickboardCode);
     if (enabled) await kickboard.lightOn({ mode: 0, seconds: 0 });
     else kickboard.lightOff();
@@ -523,6 +527,7 @@ export class Ride {
 
   public static async getStatus(ride: RideModel): Promise<RideStatus> {
     if (ride.terminatedAt) throw RESULT.ALREADY_TERMINATED_RIDE();
+    const kickboardClient = InternalClient.getKickboard();
     const { gps, power, isEnabled, isLightsOn, isFallDown, speed, createdAt } =
       await kickboardClient
         .getKickboard(ride.kickboardCode)
@@ -555,6 +560,7 @@ export class Ride {
     enabled: boolean
   ): Promise<void> {
     if (ride.terminatedAt) throw RESULT.ALREADY_TERMINATED_RIDE();
+    const kickboardClient = InternalClient.getKickboard();
     const kickboard = await kickboardClient.getKickboard(ride.kickboardCode);
     if (enabled) await kickboard.lock();
     else kickboard.unlock();

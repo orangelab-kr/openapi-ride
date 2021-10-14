@@ -1,5 +1,4 @@
-import { RESULT, Wrapper, WrapperCallback } from '..';
-import { Payment } from '../controllers';
+import { Payment, RESULT, Wrapper, WrapperCallback } from '..';
 
 export function InternalPaymentMiddleware(): WrapperCallback {
   return Wrapper(async (req, res, next) => {
