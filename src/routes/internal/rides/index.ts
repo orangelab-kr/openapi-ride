@@ -56,7 +56,7 @@ export function getInternalRidesRouter(): Router {
     Wrapper(async (req) => {
       const { body } = req;
       const platformClient = InternalClient.getPlatform([
-        PlatformPermission.PLATFORMS_VIEW,
+        PlatformPermission.PLATFORM_VIEW,
       ]);
 
       const platform = await platformClient.getPlatform(body.platformId);

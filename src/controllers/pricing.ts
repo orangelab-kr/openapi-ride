@@ -115,7 +115,7 @@ export class Pricing {
       .with('discountGroupId', 'discountId')
       .validateAsync(props);
     const locationClient = InternalClient.getLocation([
-      LocationPermission.GEOFENCES_LOCATION,
+      LocationPermission.LOCATION_GEOFENCE_LOCATION,
     ]);
 
     const location = await locationClient.getGeofenceByLocation({ lat, lng });

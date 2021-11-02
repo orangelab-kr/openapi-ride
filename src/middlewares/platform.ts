@@ -14,8 +14,8 @@ export function PlatformMiddleware(
   };
 
   const platformClient = InternalClient.getPlatform([
-    PlatformPermission.AUTHORIZE_USER,
-    PlatformPermission.AUTHORIZE_ACCESS_KEY,
+    PlatformPermission.PLATFORM_USER_AUTHORIZE,
+    PlatformPermission.PLATFORM_ACCESS_KEY_AUTHORIZE,
   ]);
 
   return Wrapper(async (req, res, next) => {

@@ -199,7 +199,7 @@ export class Payment {
 
   public static async sendPaymentWebhook(payment: PaymentModel): Promise<void> {
     const webhookClient = InternalClient.getWebhook([
-      WebhookPermission.REQUESTS_SEND,
+      WebhookPermission.WEBHOOK_REQUEST_SEND,
     ]);
 
     await webhookClient.request(payment.platformId, {
@@ -210,7 +210,7 @@ export class Payment {
 
   public static async sendRefundWebhook(payment: PaymentModel): Promise<void> {
     const webhookClient = InternalClient.getWebhook([
-      WebhookPermission.REQUESTS_SEND,
+      WebhookPermission.WEBHOOK_REQUEST_SEND,
     ]);
 
     await webhookClient.request(payment.platformId, {

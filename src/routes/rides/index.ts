@@ -19,6 +19,7 @@ export * from './payments';
 
 export function getRidesRouter(): Router {
   const router = Router();
+
   router.use(
     '/:rideId/lights',
     PlatformMiddleware({
