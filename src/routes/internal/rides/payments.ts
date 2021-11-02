@@ -1,4 +1,10 @@
-import { InternalPaymentMiddleware, RESULT, Payment, Wrapper } from '../../..';
+import {
+  InternalPaymentMiddleware,
+  RESULT,
+  Payment,
+  Wrapper,
+  Ride,
+} from '../../..';
 
 import { Router } from 'express';
 

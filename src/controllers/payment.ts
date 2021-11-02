@@ -1,6 +1,6 @@
 import { PaymentModel, PaymentType, Prisma, RideModel } from '@prisma/client';
 import { WebhookPermission } from 'openapi-internal-sdk';
-import { InternalClient, Joi, prisma, RESULT } from '..';
+import { InternalClient, Joi, prisma, RESULT, Ride } from '..';
 
 export class Payment {
   public static async getPayments(props: {
@@ -97,6 +97,7 @@ export class Payment {
     let price = 0;
     payments.forEach(({ amount }) => (price += amount));
     await prisma.rideModel.update({ where: { rideId }, data: { price } });
+    if (payments.length <= 0) await Ride.cancelInsurance(ride);
   }
 
   public static async getPaymentsByRide(
@@ -160,13 +161,16 @@ export class Payment {
     const { rideId } = ride;
     const payments = await prisma.paymentModel.findMany({ where: { rideId } });
     await Promise.all(
-      payments.map((payment) => this.refundPayment(ride, payment))
+      payments.map((payment) => this.refundPayment(ride, payment, false))
     );
+
+    await Payment.refreshPrice(ride);
   }
 
   public static async refundPayment(
     ride: RideModel,
-    payment: PaymentModel
+    payment: PaymentModel,
+    withRefreshPrice = true
   ): Promise<void> {
     if (payment.refundedAt !== null) return;
     const { paymentId } = payment;
@@ -190,7 +194,7 @@ export class Payment {
     });
 
     await Payment.sendRefundWebhook(payment);
-    await Payment.refreshPrice(ride);
+    if (withRefreshPrice) await Payment.refreshPrice(ride);
   }
 
   public static async sendPaymentWebhook(payment: PaymentModel): Promise<void> {

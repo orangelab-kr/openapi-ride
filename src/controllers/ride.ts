@@ -346,6 +346,21 @@ export class Ride {
     return rideId === lastRide.rideId;
   }
 
+  public static async cancelInsurance(ride: RideModel): Promise<void> {
+    const permissions = [
+      InsurancePermission.INSURANCE_VIEW,
+      InsurancePermission.INSURANCE_CANCEL,
+    ];
+
+    try {
+      const { insuranceId } = ride;
+      if (!insuranceId) return;
+      await InternalClient.getInsurance(permissions)
+        .getInsurance(insuranceId)
+        .then((insurance) => insurance.cancel());
+    } catch (err: any) {}
+  }
+
   public static async terminateRide(
     ride: RideModel,
     props: {
