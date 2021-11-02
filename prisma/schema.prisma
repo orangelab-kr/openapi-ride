@@ -116,6 +116,7 @@ model LocationModel {
 enum RideTerminatedType {
   USER_REQUESTED
   ADMIN_REQUESTED
+  LOW_BATTERY
   UNUSED
 }
 

@@ -52,6 +52,7 @@ export class Ride {
     regionId?: string;
     discountGroupId?: string;
     terminatedType?: RideTerminatedType;
+    kickboardCode?: string;
     startedAt?: Date;
     endedAt?: Date;
     orderByField?:
@@ -65,7 +66,7 @@ export class Ride {
     const schema = Joi.object({
       take: Joi.number().default(10).optional(),
       skip: Joi.number().default(0).optional(),
-      search: Joi.string().allow('').default('').optional(),
+      search: Joi.string().allow('').optional(),
       platformId: Joi.string().uuid().optional(),
       franchiseId: Joi.string().uuid().optional(),
       regionId: Joi.string().uuid().optional(),
@@ -73,6 +74,7 @@ export class Ride {
       terminatedType: Joi.string()
         .valid(...Object.keys(RideTerminatedType))
         .optional(),
+      kickboardCode: Joi.string().optional(),
       startedAt: Joi.date().default(new Date(0)).optional(),
       endedAt: Joi.date().default(new Date()).optional(),
       orderByField: Joi.string()
@@ -92,6 +94,7 @@ export class Ride {
       regionId,
       discountGroupId,
       terminatedType,
+      kickboardCode,
       startedAt,
       endedAt,
       orderByField,
@@ -101,7 +104,10 @@ export class Ride {
     const orderBy = { [orderByField]: orderBySort };
     const where: Prisma.RideModelWhereInput = {
       startedAt: { gte: startedAt, lte: endedAt },
-      OR: [
+    };
+
+    if (search) {
+      where.OR = [
         { rideId: search },
         { kickboardCode: search },
         { insuranceId: search },
@@ -112,14 +118,15 @@ export class Ride {
         { realname: { contains: search } },
         { phone: { contains: search } },
         { receiptId: search },
-      ],
-    };
+      ];
+    }
 
     if (platformId) where.platformId = platformId;
     if (franchiseId) where.franchiseId = franchiseId;
     if (regionId) where.regionId = regionId;
     if (discountGroupId) where.discountGroupId = discountGroupId;
     if (terminatedType) where.terminatedType = terminatedType;
+    if (kickboardCode) where.kickboardCode = kickboardCode;
     if (!showTerminated) where.terminatedAt = null;
     const [total, rides] = await prisma.$transaction([
       prisma.rideModel.count({ where }),
@@ -479,7 +486,7 @@ export class Ride {
 
   public static async sendEndWebhook(ride: RideModel): Promise<void> {
     const webhookClient = InternalClient.getWebhook([
-      WebhookPermission.REQUESTS_SEND,
+      WebhookPermission.WEBHOOK_REQUEST_SEND,
     ]);
 
     await webhookClient.request(ride.platformId, {

@@ -20,6 +20,11 @@ async function main() {
   const app = express();
   registerSentry(app);
 
+  if (process.env.NODE_ENV === 'dev') {
+    const { PrismaStudioMiddleware } = await import('express-prisma-studio');
+    app.use('/prisma', PrismaStudioMiddleware(prisma));
+  }
+
   app.use(cors());
   app.use(i18n.init);
   app.use(express.json());

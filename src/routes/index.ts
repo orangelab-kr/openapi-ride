@@ -3,6 +3,7 @@ import {
   clusterInfo,
   getInternalRouter,
   getRidesRouter,
+  getWebhookRouter,
   InternalMiddleware,
   Payment,
   PlatformMiddleware,
@@ -12,11 +13,13 @@ import {
 
 export * from './internal';
 export * from './rides';
+export * from './webhook';
 
 export function getRouter(): Router {
   const router = Router();
 
   router.use('/rides', getRidesRouter());
+  router.use('/webhook', getWebhookRouter());
   router.use('/internal', InternalMiddleware(), getInternalRouter());
   router.get(
     '/',
