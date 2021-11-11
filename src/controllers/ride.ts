@@ -204,7 +204,6 @@ export class Ride {
     }
 
     const { gps } = await kickboard.getLatestStatus();
-    await kickboard.setMaxSpeed(20);
     await kickboard.start();
     await kickboard.setPhoto(null);
 
@@ -543,8 +542,26 @@ export class Ride {
     if (ride.terminatedAt) throw RESULT.ALREADY_TERMINATED_RIDE();
     const kickboardClient = InternalClient.getKickboard();
     const kickboard = await kickboardClient.getKickboard(ride.kickboardCode);
-    if (enabled) await kickboard.lightOn({ mode: 0, seconds: 0 });
-    else kickboard.lightOff();
+    if (enabled) return kickboard.lightOn({ mode: 0, seconds: 0 });
+    return kickboard.lightOff();
+  }
+
+  public static async setMaxSpeed(
+    ride: RideModel,
+    props: { maxSpeed?: number }
+  ): Promise<void> {
+    const { maxSpeed } = await Joi.object({
+      maxSpeed: Joi.number()
+        .min(0)
+        .max(20)
+        .allow(null)
+        .default(null)
+        .optional(),
+    }).validateAsync(props);
+    if (ride.terminatedAt) throw RESULT.ALREADY_TERMINATED_RIDE();
+    await InternalClient.getKickboard()
+      .getKickboard(ride.kickboardCode)
+      .then((kickboard) => kickboard.setMaxSpeed(maxSpeed));
   }
 
   public static async getStatus(ride: RideModel): Promise<RideStatus> {
@@ -584,7 +601,7 @@ export class Ride {
     if (ride.terminatedAt) throw RESULT.ALREADY_TERMINATED_RIDE();
     const kickboardClient = InternalClient.getKickboard();
     const kickboard = await kickboardClient.getKickboard(ride.kickboardCode);
-    if (enabled) await kickboard.lock();
-    else kickboard.unlock();
+    if (enabled) return kickboard.lock();
+    return kickboard.unlock();
   }
 }

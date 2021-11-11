@@ -121,5 +121,15 @@ export function getInternalRidesRouter(): Router {
     })
   );
 
+  router.get(
+    '/:rideId/maxSpeed',
+    InternalPermissionMiddleware(PERMISSION.RIDE_CONTROL),
+    InternalRideMiddleware(),
+    Wrapper(async (req) => {
+      await Ride.setMaxSpeed(req.internal.ride, req.query);
+      throw RESULT.SUCCESS();
+    })
+  );
+
   return router;
 }

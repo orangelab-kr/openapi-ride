@@ -22,40 +22,28 @@ export function getRidesRouter(): Router {
 
   router.use(
     '/:rideId/lights',
-    PlatformMiddleware({
-      permissionIds: ['rides.lights'],
-      final: true,
-    }),
+    PlatformMiddleware({ permissionIds: ['rides.lights'], final: true }),
     RideMiddleware(),
     getRidesLightsRouter()
   );
 
   router.use(
     '/:rideId/lock',
-    PlatformMiddleware({
-      permissionIds: ['rides.lock'],
-      final: true,
-    }),
+    PlatformMiddleware({ permissionIds: ['rides.lock'], final: true }),
     RideMiddleware(),
     getRidesLockRouter()
   );
 
   router.use(
     '/:rideId/payments',
-    PlatformMiddleware({
-      permissionIds: ['rides.view'],
-      final: true,
-    }),
+    PlatformMiddleware({ permissionIds: ['rides.view'], final: true }),
     RideMiddleware(),
     getRidesPaymentsRouter()
   );
 
   router.get(
     '/',
-    PlatformMiddleware({
-      permissionIds: ['rides.list'],
-      final: true,
-    }),
+    PlatformMiddleware({ permissionIds: ['rides.list'], final: true }),
     Wrapper(async (req) => {
       const { query } = req;
       query.platformId = req.loggined.platform.platformId;
@@ -66,10 +54,7 @@ export function getRidesRouter(): Router {
 
   router.post(
     '/',
-    PlatformMiddleware({
-      permissionIds: ['rides.start'],
-      final: true,
-    }),
+    PlatformMiddleware({ permissionIds: ['rides.start'], final: true }),
     Wrapper(async (req) => {
       const { rideId } = await Ride.startRide(req.loggined.platform, req.body);
       throw RESULT.SUCCESS({ details: { rideId } });
@@ -78,10 +63,7 @@ export function getRidesRouter(): Router {
 
   router.post(
     '/:rideId/photo',
-    PlatformMiddleware({
-      permissionIds: ['rides.photo'],
-      final: true,
-    }),
+    PlatformMiddleware({ permissionIds: ['rides.photo'], final: true }),
     RideMiddleware(),
     Wrapper(async (req) => {
       await Ride.uploadRidePhoto(req.ride, req.body);
@@ -91,10 +73,7 @@ export function getRidesRouter(): Router {
 
   router.post(
     '/:rideId/discount',
-    PlatformMiddleware({
-      permissionIds: ['rides.discount'],
-      final: true,
-    }),
+    PlatformMiddleware({ permissionIds: ['rides.discount'], final: true }),
     RideMiddleware(),
     Wrapper(async (req) => {
       await Ride.changeDiscount(req.ride, req.body);
@@ -104,10 +83,7 @@ export function getRidesRouter(): Router {
 
   router.get(
     '/:rideId/status',
-    PlatformMiddleware({
-      permissionIds: ['rides.status'],
-      final: true,
-    }),
+    PlatformMiddleware({ permissionIds: ['rides.status'], final: true }),
     RideMiddleware(),
     Wrapper(async (req) => {
       const status = await Ride.getStatus(req.ride);
@@ -117,10 +93,7 @@ export function getRidesRouter(): Router {
 
   router.get(
     '/:rideId',
-    PlatformMiddleware({
-      permissionIds: ['rides.view'],
-      final: true,
-    }),
+    PlatformMiddleware({ permissionIds: ['rides.view'], final: true }),
     RideMiddleware(),
     Wrapper(async (req) => {
       const { ride } = req;
@@ -130,10 +103,7 @@ export function getRidesRouter(): Router {
 
   router.delete(
     '/:rideId',
-    PlatformMiddleware({
-      permissionIds: ['rides.terminate'],
-      final: true,
-    }),
+    PlatformMiddleware({ permissionIds: ['rides.terminate'], final: true }),
     RideMiddleware(),
     Wrapper(async (req) => {
       await Ride.terminateRide(req.ride, req.query);
@@ -143,10 +113,7 @@ export function getRidesRouter(): Router {
 
   router.get(
     '/:rideId/pricing',
-    PlatformMiddleware({
-      permissionIds: ['rides.pricing'],
-      final: true,
-    }),
+    PlatformMiddleware({ permissionIds: ['rides.pricing'], final: true }),
     RideMiddleware(),
     Wrapper(async (req) => {
       const { ride, query } = req;
@@ -157,14 +124,21 @@ export function getRidesRouter(): Router {
 
   router.get(
     '/:rideId/timeline',
-    PlatformMiddleware({
-      permissionIds: ['rides.timeline'],
-      final: true,
-    }),
+    PlatformMiddleware({ permissionIds: ['rides.timeline'], final: true }),
     RideMiddleware(),
     Wrapper(async (req) => {
       const timeline = await Ride.getTimeline(req.ride);
       throw RESULT.SUCCESS({ details: { timeline } });
+    })
+  );
+
+  router.get(
+    '/:rideId/maxSpeed',
+    PlatformMiddleware({ permissionIds: ['rides.maxSpeed'], final: true }),
+    RideMiddleware(),
+    Wrapper(async (req) => {
+      await Ride.setMaxSpeed(req.ride, req.query);
+      throw RESULT.SUCCESS();
     })
   );
 
