@@ -519,6 +519,20 @@ export class Ride {
     });
   }
 
+  public static async sendSpeedChangeWebhook(
+    ride: RideModel,
+    props: any
+  ): Promise<void> {
+    const webhookClient = InternalClient.getWebhook([
+      WebhookPermission.WEBHOOK_REQUEST_SEND,
+    ]);
+
+    await webhookClient.request(ride.platformId, {
+      type: 'speedChange',
+      data: { ...props, ride },
+    });
+  }
+
   public static async getRide(
     rideId: string,
     platform?: InternalPlatform

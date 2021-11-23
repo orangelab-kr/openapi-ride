@@ -91,4 +91,11 @@ export class Webhook {
       terminatedType: RideTerminatedType.LOW_BATTERY,
     });
   }
+
+  public static async onSpeedChange(props: any): Promise<void> {
+    const { kickboardCode } = props.kickboard;
+    const { rides } = await Ride.getRides({ take: 1, skip: 0, kickboardCode });
+    if (rides.length <= 0) return;
+    await Ride.sendSpeedChangeWebhook(rides[0], props);
+  }
 }

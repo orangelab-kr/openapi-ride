@@ -1,6 +1,5 @@
 import { Router } from 'express';
-import { RESULT, Wrapper } from '..';
-import { Webhook } from '../controllers/webhook';
+import { RESULT, Webhook, Wrapper } from '..';
 
 export function getWebhookRouter(): Router {
   const router = Router();
@@ -9,6 +8,14 @@ export function getWebhookRouter(): Router {
     '/lowBattery',
     Wrapper(async (req) => {
       await Webhook.onLowBattery(req.body);
+      throw RESULT.SUCCESS();
+    })
+  );
+
+  router.post(
+    '/speedChange',
+    Wrapper(async (req) => {
+      await Webhook.onSpeedChange(req.body);
       throw RESULT.SUCCESS();
     })
   );
