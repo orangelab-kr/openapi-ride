@@ -12,5 +12,6 @@
   "PHOTO_UPLOAD_TIMEOUT": "Return photos can only be uploaded within 30 minutes of the end of the ride.",
   "ALREADY_PHOTO_UPLOAD": "You have already uploaded a return photo.",
   "ALREADY_TERMINATED_RIDE": "The ride has already ended.",
-  "CANNOT_FIND_RIDE": "Ride history does not exist."
+  "CANNOT_FIND_RIDE": "Ride history does not exist.",
+  "KICKBOARD_TOO_FAR": "The kickboard is too far away. (%sM)"
 }

@@ -1,5 +1,6 @@
 export * from './clusterInfo';
 export * from './database';
+export * from './geometry';
 export * from './internalClient';
 export * from './joi';
 export * from './logger';

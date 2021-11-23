@@ -12,5 +12,6 @@
   "PHOTO_UPLOAD_TIMEOUT": "반납 사진은 라이드가 종료된 후 30분 이내로만 업로드할 수 있습니다.",
   "ALREADY_PHOTO_UPLOAD": "이미 반납 사진을 업로드하였습니다.",
   "ALREADY_TERMINATED_RIDE": "이미 종료된 라이드입니다.",
-  "CANNOT_FIND_RIDE": "라이드 기록이 존재하지 않습니다."
+  "CANNOT_FIND_RIDE": "라이드 기록이 존재하지 않습니다.",
+  "KICKBOARD_TOO_FAR": "킥보드가 너무 멀리 떨어져 있습니다. (%sM)"
 }

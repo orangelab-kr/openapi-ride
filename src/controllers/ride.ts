@@ -12,7 +12,15 @@ import {
   InternalPlatform,
   WebhookPermission,
 } from 'openapi-internal-sdk';
-import { InternalClient, Joi, Payment, Pricing, prisma, RESULT } from '..';
+import {
+  Geometry,
+  InternalClient,
+  Joi,
+  Payment,
+  Pricing,
+  prisma,
+  RESULT,
+} from '..';
 
 export interface RideTimeline {
   latitude: number;
@@ -153,6 +161,7 @@ export class Ride {
       discountGroupId?: string;
       latitude: number;
       longitude: number;
+      debug?: boolean;
     }
   ): Promise<RideModel> {
     const schema = Joi.object({
@@ -170,6 +179,7 @@ export class Ride {
       discountId: Joi.string().uuid().allow(null).optional(),
       latitude: Joi.number().min(-90).max(90).required(),
       longitude: Joi.number().min(-180).max(180).required(),
+      debug: Joi.boolean().optional(),
     }).with('discountGroupId', 'discountId');
 
     const {
@@ -182,6 +192,7 @@ export class Ride {
       latitude,
       longitude,
       kickboardCode: code,
+      debug,
     }: {
       kickboardCode: string;
       userId: string;
@@ -192,6 +203,7 @@ export class Ride {
       discountGroupId?: string;
       latitude: number;
       longitude: number;
+      debug?: boolean;
     } = await schema.validateAsync(props);
     const { platformId } = platform;
     const kickboardCode = code.toUpperCase();
@@ -204,6 +216,19 @@ export class Ride {
     }
 
     const { gps } = await kickboard.getLatestStatus();
+    if (!debug && !gps.isValid) {
+      const distance = Geometry.getDistance(
+        { lat: gps.latitude, lng: gps.longitude },
+        { lat: latitude, lng: longitude }
+      );
+
+      if (distance > 300) {
+        throw RESULT.KICKBOARD_TOO_FAR({
+          args: [Math.round(distance).toLocaleString()],
+        });
+      }
+    }
+
     await kickboard.start();
     await kickboard.setPhoto(null);
 
