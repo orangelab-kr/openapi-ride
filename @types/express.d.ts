@@ -12,6 +12,7 @@ declare global {
       ride: RideModel;
       payment: PaymentModel;
       permissionIds: string[];
+      helmet: BorrowedHelmetModel;
       loggined: {
         platform: InternalPlatform;
         accessKey?: InternalPlatformAccessKey;

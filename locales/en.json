@@ -13,5 +13,7 @@
   "ALREADY_PHOTO_UPLOAD": "You have already uploaded a return photo.",
   "ALREADY_TERMINATED_RIDE": "The ride has already ended.",
   "CANNOT_FIND_RIDE": "Ride history does not exist.",
-  "KICKBOARD_TOO_FAR": "The kickboard is too far away. (%sM)"
+  "KICKBOARD_TOO_FAR": "The kickboard is too far away. (%sM)",
+  "NOT_BORROWED_HELMET": "First you need to borrow a helmet.",
+  "HELMET_NOT_REGISTERED": "This is a kickboard with no helmet registered."
 }

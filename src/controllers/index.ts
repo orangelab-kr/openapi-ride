@@ -1,3 +1,4 @@
+export * from './borrowedHelmet';
 export * from './payment';
 export * from './pricing';
 export * from './ride';

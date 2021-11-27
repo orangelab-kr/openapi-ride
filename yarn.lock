@@ -94,7 +94,7 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@prisma/client@3.5.0", "@prisma/client@^3.4.0":
+"@prisma/client@3.5.0", "@prisma/client@^3.5.0":
   version "3.5.0"
   resolved "https://hikick-547032093617.d.codeartifact.ap-northeast-1.amazonaws.com:443/npm/hikick/@prisma/client/-/client-3.5.0.tgz#bb0c9c10fd9912209f5bfd01c1683094d8fa9a2d"
   integrity sha512-LuaaisknLe9CCfJ1Rtqe9b9knvPgEEcC77OMmWdo3fSanxl5oTDxcH3IIhpULQQlJfZvDcaEXuXNU4dsNF+q1w==
@@ -185,7 +185,7 @@
   dependencies:
     "@prisma/debug" "3.4.2"
 
-"@prisma/sdk@^3.4.0":
+"@prisma/sdk@^3.5.0":
   version "3.5.0"
   resolved "https://hikick-547032093617.d.codeartifact.ap-northeast-1.amazonaws.com:443/npm/hikick/@prisma/sdk/-/sdk-3.5.0.tgz#82c08307277d77ae7de0cc57b253afb83047b3f8"
   integrity sha512-Qgy4xomni08WDDReCB5kNUsPpqfsfjZpaIduk/D/SdydKmPOqJwMbJMokObySfWzuUjl8UpgpIs7eQiy8ax3mQ==
@@ -227,39 +227,39 @@
     terminal-link "2.1.1"
     tmp "0.2.1"
 
-"@prisma/studio-common@0.438.0":
-  version "0.438.0"
-  resolved "https://hikick-547032093617.d.codeartifact.ap-northeast-1.amazonaws.com:443/npm/hikick/@prisma/studio-common/-/studio-common-0.438.0.tgz#56aa7ce7419017de3a0a3194b6941e436f6ade8d"
-  integrity sha512-jOmj9Bacgj6PsDWa7EDUk2kAIPZPhCYjlCM19E0xLDEPlGHa6AGSKb/4hOL6SLtKl1/34PzPcWm+Xwoqv1i0EA==
+"@prisma/studio-common@0.440.0":
+  version "0.440.0"
+  resolved "https://hikick-547032093617.d.codeartifact.ap-northeast-1.amazonaws.com:443/npm/hikick/@prisma/studio-common/-/studio-common-0.440.0.tgz#df847867aab3b62d08203706b88b9aa336c95c54"
+  integrity sha512-5iTuF9XPf92mYwB+Qju6GDLwE+sZyPKFFkG91XbtRWIKv1fc9Taee7j8kfu6XxnMv5I+u6w3t5uvORfurqhBxw==
   dependencies:
     buffer "6.0.3"
 
-"@prisma/studio-pcw@0.438.0":
-  version "0.438.0"
-  resolved "https://hikick-547032093617.d.codeartifact.ap-northeast-1.amazonaws.com:443/npm/hikick/@prisma/studio-pcw/-/studio-pcw-0.438.0.tgz#3f112d39e34773ae5acb2a8663eaae9370fb1599"
-  integrity sha512-8MbFYTabwxJ7mbB9fxC0+74pCDbR57Bz4VBXM2+q2TBslq7erpZvwaTT922OY47ml3EYsq1uAqTOzCOOvRJsbw==
+"@prisma/studio-pcw@0.440.0":
+  version "0.440.0"
+  resolved "https://hikick-547032093617.d.codeartifact.ap-northeast-1.amazonaws.com:443/npm/hikick/@prisma/studio-pcw/-/studio-pcw-0.440.0.tgz#a8c6888cc4f2a34036c3c56ce6c479281ea99a25"
+  integrity sha512-baMNOutNoO/yOliTkJiJ6bTfBG7gp9qoDEQNQ/Vp3ZcKnjzWy6LeZDskLBhV1CTZc/VMO9/ymAFMMrUQY0YaWA==
   dependencies:
     debug "4.3.2"
     lodash "4.17.21"
 
-"@prisma/studio-server@^0.438.0":
-  version "0.438.0"
-  resolved "https://hikick-547032093617.d.codeartifact.ap-northeast-1.amazonaws.com:443/npm/hikick/@prisma/studio-server/-/studio-server-0.438.0.tgz#c3d87c623ed0c0a6e096c072c70f7ee1715d2174"
-  integrity sha512-l5b2EG6BGCgPUDM1/NSIMOhUS1KYxj0QaLbIHDYzVOYUSynmEOAyaNegS1cFcSNurmin1aZo7rGmA+jz9zpeHA==
+"@prisma/studio-server@^0.440.0":
+  version "0.440.0"
+  resolved "https://hikick-547032093617.d.codeartifact.ap-northeast-1.amazonaws.com:443/npm/hikick/@prisma/studio-server/-/studio-server-0.440.0.tgz#3ed587e7586385346967deca8e29906179559511"
+  integrity sha512-UayN7uXPiG0dZFA1JsMhqE8fbaGDkGq1N90gh1bjDRIOqsvhNRd8+S0dgAxO/zKGayxftWyXoIVUtYO+eXj45A==
   dependencies:
-    "@prisma/studio" "0.438.0"
-    "@prisma/studio-common" "0.438.0"
-    "@prisma/studio-pcw" "0.438.0"
+    "@prisma/studio" "0.440.0"
+    "@prisma/studio-common" "0.440.0"
+    "@prisma/studio-pcw" "0.440.0"
     checkpoint-client "1.1.20"
     cors "2.8.5"
     debug "4.3.2"
     express "4.17.1"
     untildify "4.0.0"
 
-"@prisma/studio@0.438.0":
-  version "0.438.0"
-  resolved "https://hikick-547032093617.d.codeartifact.ap-northeast-1.amazonaws.com:443/npm/hikick/@prisma/studio/-/studio-0.438.0.tgz#0837bd6d68c32c63eb1ed745cf1584314f12e4a1"
-  integrity sha512-UGT5L/kmp109hoYL5haIj8LPJ+rFyFXpY7u7OewQvo4krhhSKoLikfV7Vy8P1mrsCHJBZwEvOJ8jvij7gmPfqQ==
+"@prisma/studio@0.440.0":
+  version "0.440.0"
+  resolved "https://hikick-547032093617.d.codeartifact.ap-northeast-1.amazonaws.com:443/npm/hikick/@prisma/studio/-/studio-0.440.0.tgz#cc51938664704caf87bd5d20b2b410e87a7b3e5c"
+  integrity sha512-7Q+M8v809pKKQ+07X03l7RDzD4JF4JAZ0lXT4ONm7i5IUW2zlfB8FzGnSACC+qHxDCGt+425MNaV9rqsiQYPqw==
 
 "@sentry/core@6.15.0":
   version "6.15.0"
@@ -473,10 +473,10 @@
   resolved "https://hikick-547032093617.d.codeartifact.ap-northeast-1.amazonaws.com:443/npm/hikick/@types/ms/-/ms-0.7.31.tgz#31b7ca6407128a3d2bbc27fe2d21b345397f6197"
   integrity sha512-iiUgKzV9AuaEkZqkOLDIvlQiL6ltuZd9tGcW3gwpnX8JbuiuhFlEGmmFXEXkN50Cvq7Os88IY2v0dkDqXYWVgA==
 
-"@types/node@*", "@types/node@^16.11.9":
-  version "16.11.9"
-  resolved "https://hikick-547032093617.d.codeartifact.ap-northeast-1.amazonaws.com:443/npm/hikick/@types/node/-/node-16.11.9.tgz#879be3ad7af29f4c1a5c433421bf99fab7047185"
-  integrity sha512-MKmdASMf3LtPzwLyRrFjtFFZ48cMf8jmX5VRYrDQiJa8Ybu5VAmkqBWqKU8fdCwD8ysw4mQ9nrEHvzg6gunR7A==
+"@types/node@*", "@types/node@^16.11.10":
+  version "16.11.10"
+  resolved "https://hikick-547032093617.d.codeartifact.ap-northeast-1.amazonaws.com:443/npm/hikick/@types/node/-/node-16.11.10.tgz#2e3ad0a680d96367103d3e670d41c2fed3da61ae"
+  integrity sha512-3aRnHa1KlOEEhJ6+CvyHKK5vE9BcLGjtUpwvqYLRvYNQKMfabu3BwfJaA/SLW8dxe28LsNDjtHwePTuzn3gmOA==
 
 "@types/normalize-package-data@^2.4.0":
   version "2.4.1"
@@ -867,9 +867,9 @@ ci-info@3.1.1:
   integrity sha512-kdRWLBIJwdsYJWYJFtAFFYxybguqeF91qpZaggjG5Nf8QKdizFG2hjqvaTXbxFIcYbSaD74KpAXv6BSm17DHEQ==
 
 ci-info@^3.2.0:
-  version "3.2.0"
-  resolved "https://hikick-547032093617.d.codeartifact.ap-northeast-1.amazonaws.com:443/npm/hikick/ci-info/-/ci-info-3.2.0.tgz#2876cb948a498797b5236f0095bc057d0dca38b6"
-  integrity sha512-dVqRX7fLUm8J6FgHJ418XuIgDLZDkYcDFTeL6TA2gt5WlIZUQrrH6EZrNClwT/H0FateUsZkGIOPRrLbP+PR9A==
+  version "3.3.0"
+  resolved "https://hikick-547032093617.d.codeartifact.ap-northeast-1.amazonaws.com:443/npm/hikick/ci-info/-/ci-info-3.3.0.tgz#b4ed1fb6818dea4803a55c623041f9165d2066b2"
+  integrity sha512-riT/3vI5YpVH6/qomlDnJow6TBee2PBKSEpx3O32EGPYbWGIRsIlGRms3Sm74wYE1JMo8RnO04Hb12+v1J5ICw==
 
 clean-stack@^2.0.0:
   version "2.2.0"
@@ -909,9 +909,9 @@ color-name@^1.0.0, color-name@~1.1.4:
   integrity sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==
 
 color-string@^1.6.0:
-  version "1.6.0"
-  resolved "https://hikick-547032093617.d.codeartifact.ap-northeast-1.amazonaws.com:443/npm/hikick/color-string/-/color-string-1.6.0.tgz#c3915f61fe267672cb7e1e064c9d692219f6c312"
-  integrity sha512-c/hGS+kRWJutUBEngKKmk4iH3sD59MBkoxVapS/0wgpCz2u7XsNloxknyvBhzwEs1IbV36D9PwqLPJ2DTu3vMA==
+  version "1.7.4"
+  resolved "https://hikick-547032093617.d.codeartifact.ap-northeast-1.amazonaws.com:443/npm/hikick/color-string/-/color-string-1.7.4.tgz#79a7bf242610a8aa1b5e2681f3bf6bcfa666245f"
+  integrity sha512-nVdUvPVgZMpRQad5dcsCMOSB5BXLljklTiaxS6ehhKxDsAI5sD7k5VmFuBt1y3Rlym8uulc/ANUN/bMWtBu6Sg==
   dependencies:
     color-name "^1.0.0"
     simple-swizzle "^0.2.2"
@@ -1372,14 +1372,14 @@ express-http-proxy@^1.6.3:
     es6-promise "^4.1.1"
     raw-body "^2.3.0"
 
-express-prisma-studio@^1.0.4:
-  version "1.0.4"
-  resolved "https://hikick-547032093617.d.codeartifact.ap-northeast-1.amazonaws.com:443/npm/hikick/express-prisma-studio/-/express-prisma-studio-1.0.4.tgz#81669084126b83174fdc67e622b31f01b27c448a"
-  integrity sha512-AiTbay0mo7bYdb5pYX78b2uD7f47Ka3K2lcM5p9AkMXbFd+UixRFuMrbgEc3crb9mh/f4gk4JprLpZLmfBRfIA==
+express-prisma-studio@^1.0.5:
+  version "1.0.5"
+  resolved "https://hikick-547032093617.d.codeartifact.ap-northeast-1.amazonaws.com:443/npm/hikick/express-prisma-studio/-/express-prisma-studio-1.0.5.tgz#c477e780bfc78c53511111a209a25ecb4d8bd6c7"
+  integrity sha512-MOPBUUq1FRmHcFupsFiLARqUsOrkNlLKCMw0e6BBDCWEj2q+HN9wf8+I2iF5tn/o/TpV6XWX8zGurZ3JdtBZDA==
   dependencies:
-    "@prisma/client" "^3.4.0"
-    "@prisma/sdk" "^3.4.0"
-    "@prisma/studio-server" "^0.438.0"
+    "@prisma/client" "^3.5.0"
+    "@prisma/sdk" "^3.5.0"
+    "@prisma/studio-server" "^0.440.0"
     express "^4.17.1"
     express-http-proxy "^1.6.3"
 
@@ -2349,10 +2349,10 @@ onetime@^5.1.2:
   dependencies:
     mimic-fn "^2.1.0"
 
-openapi-internal-sdk@^1.6.8:
-  version "1.6.8"
-  resolved "https://hikick-547032093617.d.codeartifact.ap-northeast-1.amazonaws.com:443/npm/hikick/openapi-internal-sdk/-/openapi-internal-sdk-1.6.8.tgz#e5e769c9e5b3d198c1ad98b704a68dd75232d378"
-  integrity sha512-fydx4Sg2+urmmNgXEseF5d5qgdrpbdI29/HL766L1LCKXt4I+GRmRDCGJO8qqMlBtbJFFYIpS8lqVqEcKzkD8g==
+openapi-internal-sdk@^1.6.9:
+  version "1.6.9"
+  resolved "https://hikick-547032093617.d.codeartifact.ap-northeast-1.amazonaws.com:443/npm/hikick/openapi-internal-sdk/-/openapi-internal-sdk-1.6.9.tgz#4e6f29d45cf052b908ed6d985ea72f6d6a1223f7"
+  integrity sha512-sspkUch7B25rcpDCSw3wbbIk8wpB/0a83E2Liw3uT6w5mcxx9CQFDzXQKdyr8aVWheGk3fiP90KG776ls/RUxw==
   dependencies:
     axios "^0.24.0"
     jsonwebtoken "^8.5.1"
@@ -2512,10 +2512,10 @@ prettier-linter-helpers@^1.0.0:
   dependencies:
     fast-diff "^1.1.2"
 
-prettier@^2.4.1:
-  version "2.4.1"
-  resolved "https://hikick-547032093617.d.codeartifact.ap-northeast-1.amazonaws.com:443/npm/hikick/prettier/-/prettier-2.4.1.tgz#671e11c89c14a4cfc876ce564106c4a6726c9f5c"
-  integrity sha512-9fbDAXSBcc6Bs1mZrDYb3XKzDLm4EXXL9sC1LqKP5rZkT6KRr/rf9amVUcODVXgguK/isJz0d0hP72WeaKWsvA==
+prettier@^2.5.0:
+  version "2.5.0"
+  resolved "https://hikick-547032093617.d.codeartifact.ap-northeast-1.amazonaws.com:443/npm/hikick/prettier/-/prettier-2.5.0.tgz#a6370e2d4594e093270419d9cc47f7670488f893"
+  integrity sha512-FM/zAKgWTxj40rH03VxzIPdXmj39SwSjwG0heUcNFwI+EMZJnY93yAiKXM3dObIKAM5TA88werc8T/EwhB45eg==
 
 prettysize@^2.0.0:
   version "2.0.0"

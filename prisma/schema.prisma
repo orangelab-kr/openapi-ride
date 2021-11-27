@@ -49,9 +49,12 @@ model RideModel {
   terminatedKickboardLocation   LocationModel? @relation("TerminatedKickboardLocation", fields: [terminatedKickboardLocationId], references: [locationId])
 
   receiptId String?
-  receipt   ReceiptModel?  @relation(fields: [receiptId], references: [receiptId])
-  payments  PaymentModel[]
-  price     Int            @default(0)
+  price     Int     @default(0)
+
+  receipt         ReceiptModel?         @relation(fields: [receiptId], references: [receiptId])
+  payments        PaymentModel[]
+  borrowedHelmets BorrowedHelmetModel[]
+
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -142,4 +145,25 @@ model PaymentModel {
 enum PaymentType {
   SERVICE
   SURCHARGE
+}
+
+enum BorrowedHelmetStatus {
+  IDLE
+  BORROWED
+  RETURNED
+}
+
+model BorrowedHelmetModel {
+  borrowId String               @id @default(uuid())
+  status   BorrowedHelmetStatus @default(IDLE)
+
+  deviceInfo String    @default("") @db.Text
+  returnedAt DateTime?
+
+  ride   RideModel @relation(fields: [rideId], references: [rideId])
+  rideId String
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }

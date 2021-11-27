@@ -1,6 +1,13 @@
 import { WrapperCallback, RESULT, Ride, Wrapper } from '..';
 
-export function RideMiddleware(): WrapperCallback {
+export function RideMiddleware(props?: {
+  throwIfTerminated: boolean;
+}): WrapperCallback {
+  const { throwIfTerminated } = {
+    throwIfTerminated: false,
+    ...props,
+  };
+
   return Wrapper(async (req, res, next) => {
     const { rideId } = req.params;
     const { platform } = req.loggined;
@@ -8,7 +15,12 @@ export function RideMiddleware(): WrapperCallback {
       throw RESULT.CANNOT_FIND_RIDE();
     }
 
-    req.ride = await Ride.getRideOrThrow(rideId, platform);
+    const ride = await Ride.getRideOrThrow(rideId, platform);
+    if (throwIfTerminated && ride.terminatedAt) {
+      throw RESULT.ALREADY_TERMINATED_RIDE();
+    }
+
+    req.ride = ride;
     next();
   });
 }

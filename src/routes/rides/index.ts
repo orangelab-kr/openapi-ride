@@ -1,18 +1,18 @@
+import { Router } from 'express';
 import {
-  RESULT,
-  Pricing,
-  Ride,
-  RideMiddleware,
-  Wrapper,
+  getRidesBorrowedHelmetRouter,
   getRidesLightsRouter,
   getRidesLockRouter,
   getRidesPaymentsRouter,
   PlatformMiddleware,
-  $$$,
+  Pricing,
+  RESULT,
+  Ride,
+  RideMiddleware,
+  Wrapper,
 } from '../..';
 
-import { Router } from 'express';
-
+export * from './borrowedHelmet';
 export * from './lights';
 export * from './lock';
 export * from './payments';
@@ -39,6 +39,13 @@ export function getRidesRouter(): Router {
     PlatformMiddleware({ permissionIds: ['rides.view'], final: true }),
     RideMiddleware(),
     getRidesPaymentsRouter()
+  );
+
+  router.use(
+    '/:rideId/borrowedHelmet',
+    PlatformMiddleware({ permissionIds: ['rides.helmet'], final: true }),
+    RideMiddleware({ throwIfTerminated: true }),
+    getRidesBorrowedHelmetRouter()
   );
 
   router.get(

@@ -1,3 +1,4 @@
+export * from './borrowedHelmet';
 export * from './internal';
 export * from './logger';
 export * from './payment';
