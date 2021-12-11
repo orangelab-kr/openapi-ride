@@ -55,7 +55,6 @@ model RideModel {
   payments        PaymentModel[]
   borrowedHelmets BorrowedHelmetModel[]
 
-
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
@@ -130,16 +129,20 @@ model PaymentModel {
   platformId  String
   franchiseId String
   paymentType PaymentType
-  amount      Int
 
-  rideId      String
-  ride        RideModel @relation(fields: [rideId], references: [rideId])
-  refundedAt  DateTime?
+  initialAmount Int?
+  amount        Int
+
+  rideId String
+  ride   RideModel @relation(fields: [rideId], references: [rideId])
+
+  reason     String?
+  refundedAt DateTime?
+
   processedAt DateTime?
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
 }
 
 enum PaymentType {

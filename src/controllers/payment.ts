@@ -116,19 +116,15 @@ export class Payment {
     ride: RideModel,
     props: { paymentType: PaymentType; amount: number; description?: string }
   ): Promise<PaymentModel | undefined> {
-    const schema = Joi.object({
+    const { paymentType, amount, description } = await Joi.object({
       paymentType: Joi.string()
         .valid(...Object.keys(PaymentType))
         .required(),
       amount: Joi.number().required(),
       description: Joi.string().optional(),
-    });
-
-    const { paymentType, amount, description } = await schema.validateAsync(
-      props
-    );
-
+    }).validateAsync(props);
     if (amount <= 0) return;
+    const initialAmount = amount;
     const { rideId, platformId, franchiseId } = ride;
     const payment = await prisma.paymentModel.create({
       include: {
@@ -147,6 +143,7 @@ export class Payment {
         rideId,
         paymentType,
         amount,
+        initialAmount,
         description,
         franchiseId,
       },
@@ -157,11 +154,17 @@ export class Payment {
     return payment;
   }
 
-  public static async refundAllPayment(ride: RideModel): Promise<void> {
+  public static async refundAllPayment(
+    ride: RideModel,
+    props: { reason?: string }
+  ): Promise<void> {
     const { rideId } = ride;
+    props = await Joi.object({
+      reason: Joi.string().optional(),
+    }).validateAsync(props);
     const payments = await prisma.paymentModel.findMany({ where: { rideId } });
     await Promise.all(
-      payments.map((payment) => this.refundPayment(ride, payment, false))
+      payments.map((payment) => this.refundPayment(ride, payment, props, false))
     );
 
     await Payment.refreshPrice(ride);
@@ -170,10 +173,17 @@ export class Payment {
   public static async refundPayment(
     ride: RideModel,
     payment: PaymentModel,
+    props: { reason?: string; amount?: number },
     withRefreshPrice = true
   ): Promise<void> {
     if (payment.refundedAt !== null) return;
-    const { paymentId } = payment;
+    const { paymentId, refundedAt } = payment;
+    const { reason, amount } = await Joi.object({
+      reason: Joi.string().optional(),
+      amount: Joi.number().max(payment.amount).optional(),
+    }).validateAsync(props);
+    if (refundedAt && !amount) return;
+    const updatedAmount = payment.amount - amount;
     payment = await prisma.paymentModel.update({
       where: { paymentId },
       include: {
@@ -188,12 +198,14 @@ export class Payment {
         },
       },
       data: {
+        reason,
+        amount: updatedAmount,
         refundedAt: new Date(),
         processedAt: null,
       },
     });
 
-    await Payment.sendRefundWebhook(payment);
+    await Payment.sendRefundWebhook(payment, props);
     if (withRefreshPrice) await Payment.refreshPrice(ride);
   }
 
@@ -204,18 +216,22 @@ export class Payment {
 
     await webhookClient.request(payment.platformId, {
       type: 'payment',
-      data: payment,
+      data: { payment },
     });
   }
 
-  public static async sendRefundWebhook(payment: PaymentModel): Promise<void> {
+  public static async sendRefundWebhook(
+    payment: PaymentModel,
+    props: { reason?: string; amount?: number }
+  ): Promise<void> {
     const webhookClient = InternalClient.getWebhook([
       WebhookPermission.WEBHOOK_REQUEST_SEND,
     ]);
 
+    const { reason, amount } = props;
     await webhookClient.request(payment.platformId, {
       type: 'refund',
-      data: payment,
+      data: { payment, reason, amount },
     });
   }
 

@@ -13,10 +13,7 @@ export function getRidesPaymentsRouter(): Router {
 
   router.get(
     '/',
-    PlatformMiddleware({
-      permissionIds: ['rides.payments.list'],
-      final: true,
-    }),
+    PlatformMiddleware({ permissionIds: ['rides.payments.list'], final: true }),
     Wrapper(async (req) => {
       const payments = await Payment.getPaymentsByRide(req.ride);
       throw RESULT.SUCCESS({ details: { payments } });
@@ -25,10 +22,7 @@ export function getRidesPaymentsRouter(): Router {
 
   router.get(
     '/:paymentId',
-    PlatformMiddleware({
-      permissionIds: ['rides.payments.view'],
-      final: true,
-    }),
+    PlatformMiddleware({ permissionIds: ['rides.payments.view'], final: true }),
     PaymentMiddleware(),
     Wrapper(async (req) => {
       const { payment } = req;
@@ -70,7 +64,7 @@ export function getRidesPaymentsRouter(): Router {
       final: true,
     }),
     Wrapper(async (req) => {
-      await Payment.refundAllPayment(req.ride);
+      await Payment.refundAllPayment(req.ride, req.body);
       throw RESULT.SUCCESS();
     })
   );
@@ -83,7 +77,8 @@ export function getRidesPaymentsRouter(): Router {
     }),
     PaymentMiddleware(),
     Wrapper(async (req) => {
-      await Payment.refundPayment(req.ride, req.payment);
+      const { ride, body, payment } = req;
+      await Payment.refundPayment(ride, payment, body);
       throw RESULT.SUCCESS();
     })
   );

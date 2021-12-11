@@ -1,12 +1,5 @@
-import {
-  InternalPaymentMiddleware,
-  RESULT,
-  Payment,
-  Wrapper,
-  Ride,
-} from '../../..';
-
 import { Router } from 'express';
+import { InternalPaymentMiddleware, Payment, RESULT, Wrapper } from '../../..';
 
 export function getInternalRidesPaymentsRouter(): Router {
   const router = Router();
@@ -50,7 +43,7 @@ export function getInternalRidesPaymentsRouter(): Router {
   router.delete(
     '/',
     Wrapper(async (req) => {
-      await Payment.refundAllPayment(req.internal.ride);
+      await Payment.refundAllPayment(req.internal.ride, req.body);
       throw RESULT.SUCCESS();
     })
   );
@@ -59,8 +52,8 @@ export function getInternalRidesPaymentsRouter(): Router {
     '/:paymentId',
     InternalPaymentMiddleware(),
     Wrapper(async (req) => {
-      const { ride, payment } = req.internal;
-      await Payment.refundPayment(ride, payment);
+      const { internal, body } = req;
+      await Payment.refundPayment(internal.ride, internal.payment, body);
       throw RESULT.SUCCESS();
     })
   );
