@@ -176,13 +176,15 @@ export class Payment {
     props: { reason?: string; amount?: number },
     withRefreshPrice = true
   ): Promise<void> {
-    if (payment.refundedAt !== null) return;
     const { paymentId, refundedAt } = payment;
     const { reason, amount } = await Joi.object({
       reason: Joi.string().optional(),
-      amount: Joi.number().max(payment.amount).optional(),
+      amount: Joi.number()
+        .max(payment.amount)
+        .default(payment.amount)
+        .optional(),
     }).validateAsync(props);
-    if (refundedAt && !amount) return;
+    if (refundedAt && payment.amount === amount) return;
     const updatedAmount = payment.amount - amount;
     payment = await prisma.paymentModel.update({
       where: { paymentId },
