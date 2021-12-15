@@ -184,7 +184,7 @@ export class Payment {
         .default(payment.amount)
         .optional(),
     }).validateAsync(props);
-    if (refundedAt && payment.amount === amount) return;
+    if (refundedAt && !payment.amount) return;
     const updatedAmount = payment.amount - amount;
     payment = await prisma.paymentModel.update({
       where: { paymentId },
