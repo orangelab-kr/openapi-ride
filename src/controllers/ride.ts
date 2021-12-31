@@ -13,6 +13,7 @@ import {
   WebhookPermission,
 } from 'openapi-internal-sdk';
 import {
+  BorrowedHelmet,
   Geometry,
   InternalClient,
   Joi,
@@ -458,14 +459,14 @@ export class Ride {
       } catch (err: any) {}
     }
 
-    const pricing = await Pricing.getPricingByRide(ride, {
+    const { receipt, pricing } = await Pricing.getPricingByRide(ride, {
       latitude: gps.latitude,
       longitude: gps.longitude,
       terminatedAt,
     });
 
-    const surchargePrice = pricing.surcharge.total;
-    const servicePrice = pricing.total - surchargePrice;
+    const surchargePrice = receipt.surcharge.total;
+    const servicePrice = receipt.total - surchargePrice;
     await Payment.addPayment(ride, {
       paymentType: PaymentType.SERVICE,
       amount: servicePrice,
@@ -476,8 +477,16 @@ export class Ride {
       amount: surchargePrice,
     });
 
+    const helmet = await BorrowedHelmet.getCurrentBorrowedHelmet(ride);
+    if (helmet && helmet.status === 'BORROWED' && pricing.helmetLostPrice) {
+      await Payment.addPayment(ride, {
+        description: '헬멧 분실',
+        paymentType: PaymentType.SURCHARGE,
+        amount: pricing.helmetLostPrice,
+      });
+    }
+
     const { rideId } = ride;
-    const receipt = Pricing.getReceiptToCreateInput(pricing);
     const updatedRide = await prisma.rideModel.update({
       where: { rideId },
       include: {
@@ -492,7 +501,7 @@ export class Ride {
         terminatedType,
         terminatedPhoneLocation,
         terminatedKickboardLocation,
-        receipt,
+        receipt: Pricing.getReceiptToCreateInput(receipt),
       },
     });
 

@@ -37,7 +37,7 @@ export class Pricing {
       discountGroupId?: string;
       discount?: string;
     }
-  ): Promise<Receipt> {
+  ): Promise<{ receipt: Receipt; pricing: InternalLocationPricing }> {
     const { latitude, longitude } = props;
     const schema = Joi.object({
       latitude: Joi.number().min(-90).max(90).required(),
@@ -95,7 +95,7 @@ export class Pricing {
     minutes: number;
     latitude: number;
     longitude: number;
-  }): Promise<Receipt> {
+  }): Promise<{ receipt: Receipt; pricing: InternalLocationPricing }> {
     const receipt: Receipt = { ...DefaultPricingResult };
     receipt.isNightly = this.isNightly();
 
@@ -173,7 +173,7 @@ export class Pricing {
       receipt.total = pricing.maxPrice;
     }
 
-    return receipt;
+    return { pricing, receipt };
   }
 
   public static getPerMinutePrice(props: {
