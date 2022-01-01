@@ -473,6 +473,7 @@ export class Ride {
     });
 
     await Payment.addPayment(ride, {
+      description: '미운영 구역 반납',
       paymentType: PaymentType.SURCHARGE,
       amount: surchargePrice,
     });
