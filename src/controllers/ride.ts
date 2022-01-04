@@ -1,4 +1,5 @@
 import {
+  MonitoringStatus,
   PaymentType,
   Prisma,
   RideModel,
@@ -76,14 +77,22 @@ export class Ride {
       take: Joi.number().default(10).optional(),
       skip: Joi.number().default(0).optional(),
       search: Joi.string().allow('').optional(),
-      platformId: Joi.string().uuid().optional(),
-      franchiseId: Joi.string().uuid().optional(),
-      regionId: Joi.string().uuid().optional(),
-      discountGroupId: Joi.string().uuid().optional(),
-      terminatedType: Joi.string()
-        .valid(...Object.keys(RideTerminatedType))
+      platformId: Joi.array().items(Joi.string().uuid()).single().optional(),
+      franchiseId: Joi.array().items(Joi.string().uuid()).single().optional(),
+      regionId: Joi.array().items(Joi.string().uuid()).single().optional(),
+      discountGroupId: Joi.array()
+        .items(Joi.string().uuid())
+        .single()
         .optional(),
-      kickboardCode: Joi.string().optional(),
+      terminatedType: Joi.array()
+        .items(Joi.string().valid(...Object.keys(RideTerminatedType)))
+        .single()
+        .optional(),
+      kickboardCode: Joi.array().items(Joi.string()).single().optional(),
+      monitoringStatus: Joi.array()
+        .items(Joi.string().valid(...Object.keys(MonitoringStatus)))
+        .single()
+        .optional(),
       startedAt: Joi.date().default(new Date(0)).optional(),
       endedAt: Joi.date().default(new Date()).optional(),
       orderByField: Joi.string()
@@ -130,12 +139,12 @@ export class Ride {
       ];
     }
 
-    if (platformId) where.platformId = platformId;
-    if (franchiseId) where.franchiseId = franchiseId;
-    if (regionId) where.regionId = regionId;
-    if (discountGroupId) where.discountGroupId = discountGroupId;
-    if (terminatedType) where.terminatedType = terminatedType;
-    if (kickboardCode) where.kickboardCode = kickboardCode;
+    if (platformId) where.platformId = { in: platformId };
+    if (franchiseId) where.franchiseId = { in: franchiseId };
+    if (regionId) where.regionId = { in: regionId };
+    if (discountGroupId) where.discountGroupId = { in: discountGroupId };
+    if (terminatedType) where.terminatedType = { in: terminatedType };
+    if (kickboardCode) where.kickboardCode = { in: kickboardCode };
     if (!showTerminated) where.terminatedAt = null;
     const [total, rides] = await prisma.$transaction([
       prisma.rideModel.count({ where }),
