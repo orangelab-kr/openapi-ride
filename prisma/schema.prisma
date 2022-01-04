@@ -48,6 +48,8 @@ model RideModel {
   terminatedKickboardLocationId String?
   terminatedKickboardLocation   LocationModel? @relation("TerminatedKickboardLocation", fields: [terminatedKickboardLocationId], references: [locationId])
 
+  monitoringStatus MonitoringStatus @default(BEFORE_CONFIRM)
+
   receiptId String?
   price     Int     @default(0)
 
@@ -169,4 +171,16 @@ model BorrowedHelmetModel {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
+}
+
+enum MonitoringStatus {
+  BEFORE_CONFIRM
+  CONFIRMED
+  WRONG_PARKING
+  DANGER_PARKING
+  IN_COLLECTION_AREA
+  WRONG_PICTURE
+  NO_PICTURE
+  COLLECTED_KICKBOARD
+  TOWED_KICKBOARD
 }

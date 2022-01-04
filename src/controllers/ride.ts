@@ -57,14 +57,17 @@ export class Ride {
     take?: number;
     skip?: number;
     search?: string;
-    platformId?: string;
-    franchiseId?: string;
-    regionId?: string;
-    discountGroupId?: string;
-    terminatedType?: RideTerminatedType;
-    kickboardCode?: string;
+    platformId?: string[];
+    franchiseId?: string[];
+    regionId?: string[];
+    discountGroupId?: string[];
+    terminatedType?: RideTerminatedType[];
+    kickboardCode?: string[];
+    monitoringStatus: MonitoringStatus[];
     startedAt?: Date;
     endedAt?: Date;
+    showTerminated?: boolean;
+    onlyTerminated?: boolean;
     orderByField?:
       | 'price'
       | 'startedAt'
@@ -95,11 +98,12 @@ export class Ride {
         .optional(),
       startedAt: Joi.date().default(new Date(0)).optional(),
       endedAt: Joi.date().default(new Date()).optional(),
+      showTerminated: Joi.boolean().default(true).optional(),
+      onlyTerminated: Joi.boolean().default(false).optional(),
       orderByField: Joi.string()
         .valid('price', 'startedAt', 'terminatedAt', 'createdAt', 'updatedAt')
         .default('startedAt')
         .optional(),
-      showTerminated: Joi.boolean().default(true).optional(),
       orderBySort: Joi.string().valid('asc', 'desc').default('desc').optional(),
     });
 
@@ -113,11 +117,13 @@ export class Ride {
       discountGroupId,
       terminatedType,
       kickboardCode,
+      monitoringStatus,
       startedAt,
       endedAt,
+      showTerminated,
+      onlyTerminated,
       orderByField,
       orderBySort,
-      showTerminated,
     } = await schema.validateAsync(props);
     const orderBy = { [orderByField]: orderBySort };
     const where: Prisma.RideModelWhereInput = {
@@ -145,6 +151,8 @@ export class Ride {
     if (discountGroupId) where.discountGroupId = { in: discountGroupId };
     if (terminatedType) where.terminatedType = { in: terminatedType };
     if (kickboardCode) where.kickboardCode = { in: kickboardCode };
+    if (monitoringStatus) where.monitoringStatus = { in: monitoringStatus };
+    if (onlyTerminated) where.terminatedAt = { not: null };
     if (!showTerminated) where.terminatedAt = null;
     const [total, rides] = await prisma.$transaction([
       prisma.rideModel.count({ where }),
