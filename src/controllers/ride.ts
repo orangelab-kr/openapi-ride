@@ -53,6 +53,20 @@ export interface RideStatus {
 }
 
 export class Ride {
+  public static defaultInclude: Prisma.RideModelInclude = {
+    startedPhoneLocation: true,
+    startedKickboardLocation: true,
+    terminatedPhoneLocation: true,
+    terminatedKickboardLocation: true,
+    receipt: {
+      include: {
+        standard: true,
+        perMinute: true,
+        surcharge: true,
+      },
+    },
+  };
+
   public static async getRides(props: {
     take?: number;
     skip?: number;
@@ -148,6 +162,7 @@ export class Ride {
       ];
     }
 
+    const include = Ride.defaultInclude;
     if (platformId) where.platformId = { in: platformId };
     if (franchiseId) where.franchiseId = { in: franchiseId };
     if (regionId) where.regionId = { in: regionId };
@@ -165,6 +180,7 @@ export class Ride {
         skip,
         where,
         orderBy,
+        include,
       }),
     ]);
 
@@ -511,13 +527,7 @@ export class Ride {
     const { rideId } = ride;
     const updatedRide = await prisma.rideModel.update({
       where: { rideId },
-      include: {
-        startedPhoneLocation: true,
-        startedKickboardLocation: true,
-        terminatedPhoneLocation: true,
-        terminatedKickboardLocation: true,
-        receipt: true,
-      },
+      include: Ride.defaultInclude,
       data: {
         terminatedAt,
         terminatedType,
@@ -571,19 +581,7 @@ export class Ride {
     const platformId = platform && platform.platformId;
     const ride = await prisma.rideModel.findFirst({
       where: { platformId, rideId },
-      include: {
-        startedPhoneLocation: true,
-        startedKickboardLocation: true,
-        terminatedPhoneLocation: true,
-        terminatedKickboardLocation: true,
-        receipt: {
-          include: {
-            standard: true,
-            perMinute: true,
-            surcharge: true,
-          },
-        },
-      },
+      include: Ride.defaultInclude,
     });
 
     return ride;
