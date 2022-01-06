@@ -13,8 +13,8 @@ export class Monitoring {
   ): Promise<RideModel> {
     const { rideId } = ride;
     const { monitoringStatus, sendMessage, price } = await Joi.object({
-      monitoringStatus: Joi.array()
-        .items(...Object.keys(MonitoringStatus))
+      monitoringStatus: Joi.string()
+        .valid(...Object.keys(MonitoringStatus))
         .required(),
       sendMessage: Joi.boolean().optional(),
       price: Joi.number().optional(),
