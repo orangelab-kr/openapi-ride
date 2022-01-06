@@ -13,9 +13,11 @@ import {
   Ride,
   Wrapper,
 } from '../../..';
+import { getInternalRidesMonitoringRouter } from './monitoring';
 
 export * from './lights';
 export * from './lock';
+export * from './monitoring';
 export * from './payments';
 
 export function getInternalRidesRouter(): Router {
@@ -39,6 +41,12 @@ export function getInternalRidesRouter(): Router {
     '/:rideId/payments',
     InternalRideMiddleware(),
     getInternalRidesPaymentsRouter()
+  );
+
+  router.use(
+    '/:rideId/monitoring',
+    InternalRideMiddleware(),
+    getInternalRidesMonitoringRouter()
   );
 
   router.get(
