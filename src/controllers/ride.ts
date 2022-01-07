@@ -375,7 +375,7 @@ export class Ride {
 
     // 기존에 적용한 할인 쿠폰이 있을 경우, 적용을 해제함
     if (ride.discountGroupId && ride.discountId) {
-      const { discountGroupId, discountId }: any = await ride;
+      const { discountGroupId, discountId }: any = ride;
       beforeDiscount = await discountClient
         .getDiscountGroup(discountGroupId)
         .then((discountGroup) => discountGroup.getDiscount(discountId));

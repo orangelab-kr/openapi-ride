@@ -124,8 +124,8 @@ export function getRidesRouter(): Router {
     RideMiddleware(),
     Wrapper(async (req) => {
       const { ride, query } = req;
-      const pricing = await Pricing.getPricingByRide(ride, query as any);
-      throw RESULT.SUCCESS({ details: { pricing } });
+      const { receipt, pricing } = await Pricing.getPricingByRide(ride, query);
+      throw RESULT.SUCCESS({ details: { receipt, pricing } });
     })
   );
 

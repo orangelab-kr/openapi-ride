@@ -30,8 +30,8 @@ export class Pricing {
   public static async getPricingByRide(
     ride: RideModel,
     props: {
-      latitude: number;
-      longitude: number;
+      latitude?: number;
+      longitude?: number;
       startedAt?: Date;
       terminatedAt?: Date;
       discountGroupId?: string;

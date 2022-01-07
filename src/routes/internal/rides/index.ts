@@ -109,13 +109,12 @@ export function getInternalRidesRouter(): Router {
     InternalPermissionMiddleware(PERMISSION.RIDE_PRICING),
     InternalRideMiddleware(),
     Wrapper(async (req) => {
-      const { internal, query } = req;
-      const pricing = await Pricing.getPricingByRide(
-        internal.ride,
-        query as any
+      const { receipt, pricing } = await Pricing.getPricingByRide(
+        req.internal.ride,
+        req.query
       );
 
-      throw RESULT.SUCCESS({ details: { pricing } });
+      throw RESULT.SUCCESS({ details: { receipt, pricing } });
     })
   );
 
