@@ -4,6 +4,17 @@ import { Monitoring, RESULT, Wrapper } from '../../..';
 export function getInternalRidesMonitoringRouter(): Router {
   const router = Router();
 
+  router.get(
+    '/',
+    Wrapper(async (req) => {
+      const { monitoringLogs, total } = await Monitoring.getMonitoringLogs(
+        req.internal.ride
+      );
+
+      throw RESULT.SUCCESS({ details: { monitoringLogs, total } });
+    })
+  );
+
   router.post(
     '/',
     Wrapper(async (req) => {

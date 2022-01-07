@@ -1,8 +1,38 @@
-import { MonitoringStatus, PaymentType, RideModel } from '@prisma/client';
-import { Payment } from '.';
-import { Joi, prisma } from '..';
+import {
+  MonitoringLogModel,
+  MonitoringLogType,
+  MonitoringStatus,
+  PaymentType,
+  RideModel,
+} from '@prisma/client';
+import { Joi, Payment, prisma } from '..';
 
 export class Monitoring {
+  public static async getMonitoringLogs(
+    ride: RideModel
+  ): Promise<{ monitoringLogs: MonitoringLogModel[]; total: number }> {
+    const { rideId } = ride;
+    const where = { rideId };
+    const orderBy: any = { createdAt: 'asc' };
+    const [monitoringLogs, total] = await prisma.$transaction([
+      prisma.monitoringLogModel.findMany({ where, orderBy }),
+      prisma.monitoringLogModel.count({ where }),
+    ]);
+
+    return { monitoringLogs, total };
+  }
+
+  public static async addMonitoringLog(
+    ride: RideModel,
+    logType: MonitoringLogType,
+    message: string
+  ): Promise<MonitoringLogModel> {
+    const { rideId, monitoringStatus } = ride;
+    return prisma.monitoringLogModel.create({
+      data: { rideId, monitoringStatus, logType, message },
+    });
+  }
+
   public static async setMonitoringStatus(
     ride: RideModel,
     props: {
@@ -20,20 +50,58 @@ export class Monitoring {
       price: Joi.number().optional(),
     }).validateAsync(props);
 
-    // TODO: Send Alimtalk
-    if (sendMessage) {
-    }
-
-    if (price) {
-      await Payment.addPayment(ride, {
-        paymentType: PaymentType.SURCHARGE,
-        amount: price,
-      });
-    }
-
-    return prisma.rideModel.update({
+    const isFinalAction = [
+      MonitoringStatus.TOWED_KICKBOARD,
+      MonitoringStatus.COLLECTED_KICKBOARD,
+    ].includes(monitoringStatus);
+    const updatedRide = await prisma.rideModel.update({
       where: { rideId },
       data: { monitoringStatus },
     });
+
+    await Monitoring.addMonitoringLog(
+      updatedRide,
+      MonitoringLogType.CHANGED,
+      '상태가 변경되었습니다.'
+    );
+
+    if (isFinalAction) {
+      await Monitoring.addMonitoringLog(
+        updatedRide,
+        MonitoringLogType.INFO,
+        monitoringStatus === MonitoringStatus.TOWED_KICKBOARD
+          ? '킥보드가 견인되었습니다.'
+          : '킥보드가 수거되었습니다.'
+      );
+    }
+
+    if (sendMessage) {
+      // TODO: Send Alimtalk
+      await Monitoring.addMonitoringLog(
+        updatedRide,
+        MonitoringLogType.SEND_MESSAGE,
+        '메세지를 전송하였습니다.'
+      );
+    }
+
+    if (isFinalAction && price) {
+      const description =
+        monitoringStatus === MonitoringStatus.TOWED_KICKBOARD
+          ? '견인됨'
+          : '수거됨';
+      await Payment.addPayment(ride, {
+        description,
+        paymentType: PaymentType.SURCHARGE,
+        amount: price,
+      });
+
+      Monitoring.addMonitoringLog(
+        updatedRide,
+        MonitoringLogType.ADD_PAYMENT,
+        `${price.toLocaleString()}원이 결제되었습니다.`
+      );
+    }
+
+    return updatedRide;
   }
 }

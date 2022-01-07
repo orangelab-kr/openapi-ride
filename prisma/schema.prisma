@@ -55,6 +55,7 @@ model RideModel {
 
   receipt         ReceiptModel?         @relation(fields: [receiptId], references: [receiptId])
   payments        PaymentModel[]
+  monitoringLogs  MonitoringLogModel[]
   borrowedHelmets BorrowedHelmetModel[]
 
   createdAt DateTime  @default(now())
@@ -183,4 +184,26 @@ enum MonitoringStatus {
   NO_PICTURE
   COLLECTED_KICKBOARD
   TOWED_KICKBOARD
+}
+
+enum MonitoringLogType {
+  INFO
+  CHANGED
+  SEND_MESSAGE
+  ADD_PAYMENT
+}
+
+model MonitoringLogModel {
+  monitoringLogId String @id @default(uuid())
+
+  logType          MonitoringLogType
+  monitoringStatus MonitoringStatus
+  message          String            @db.Text
+
+  rideId String
+  ride   RideModel @relation(fields: [rideId], references: [rideId])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }
