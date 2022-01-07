@@ -93,8 +93,8 @@ export class Pricing {
     discountGroupId: string | null;
     discountId: string | null;
     minutes: number;
-    latitude: number;
-    longitude: number;
+    latitude?: number;
+    longitude?: number;
   }): Promise<{ receipt: Receipt; pricing: InternalLocationPricing }> {
     const receipt: Receipt = { ...DefaultPricingResult };
     receipt.isNightly = this.isNightly();
