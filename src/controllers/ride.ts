@@ -1,4 +1,5 @@
 import {
+  MonitoringLogType,
   MonitoringStatus,
   PaymentType,
   Prisma,
@@ -18,6 +19,7 @@ import {
   Geometry,
   InternalClient,
   Joi,
+  Monitoring,
   Payment,
   Pricing,
   prisma,
@@ -523,6 +525,12 @@ export class Ride {
         amount: pricing.helmetLostPrice,
       });
     }
+
+    await Monitoring.addMonitoringLog(
+      ride,
+      MonitoringLogType.INFO,
+      '라이드가 종료되었습니다.'
+    );
 
     const { rideId } = ride;
     const updatedRide = await prisma.rideModel.update({
