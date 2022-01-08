@@ -32,3 +32,9 @@ functions:
     events:
       - http: 'ANY /'
       - http: 'ANY /{proxy+}'
+  returnedPhotoChecker:
+    handler: src/schedulers/returnedPhotoChecker.onReturnedPhotoChecker
+    events:
+      - schedule:
+          enabled: true
+          rate: rate(5 minutes)

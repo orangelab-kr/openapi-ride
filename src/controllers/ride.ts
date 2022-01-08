@@ -85,6 +85,7 @@ export class Ride {
     showTerminated?: boolean;
     onlyTerminated?: boolean;
     onlyPhoto?: boolean;
+    onlyNoPhoto?: boolean;
     orderByField?:
       | 'price'
       | 'startedAt'
@@ -118,6 +119,7 @@ export class Ride {
       showTerminated: Joi.boolean().default(true).optional(),
       onlyTerminated: Joi.boolean().default(false).optional(),
       onlyPhoto: Joi.boolean().default(false).optional(),
+      onlyNoPhoto: Joi.boolean().default(false).optional(),
       orderByField: Joi.string()
         .valid('price', 'startedAt', 'terminatedAt', 'createdAt', 'updatedAt')
         .default('startedAt')
@@ -141,6 +143,7 @@ export class Ride {
       showTerminated,
       onlyTerminated,
       onlyPhoto,
+      onlyNoPhoto,
       orderByField,
       orderBySort,
     } = await schema.validateAsync(props);
@@ -175,6 +178,7 @@ export class Ride {
     if (onlyTerminated) where.terminatedAt = { not: null };
     if (!showTerminated) where.terminatedAt = null;
     if (onlyPhoto) where.photo = { not: null };
+    if (onlyNoPhoto) where.photo = null;
     const [total, rides] = await prisma.$transaction([
       prisma.rideModel.count({ where }),
       prisma.rideModel.findMany({
