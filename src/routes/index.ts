@@ -23,7 +23,7 @@ export function getRouter(): Router {
   router.use('/internal', InternalMiddleware(), getInternalRouter());
   router.get(
     '/',
-    Wrapper(async (req) => {
+    Wrapper(async () => {
       throw RESULT.SUCCESS({ details: clusterInfo });
     })
   );

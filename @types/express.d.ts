@@ -4,7 +4,7 @@ import {
   InternalPlatform,
   InternalPlatformAccessKey,
   InternalPlatformUser,
-} from 'openapi-internal-sdk';
+} from '@hikick/openapi-internal-sdk';
 
 declare global {
   namespace Express {

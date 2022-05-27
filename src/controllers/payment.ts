@@ -1,5 +1,5 @@
 import { PaymentModel, PaymentType, Prisma, RideModel } from '@prisma/client';
-import { WebhookPermission } from 'openapi-internal-sdk';
+import { WebhookPermission } from '@hikick/openapi-internal-sdk';
 import { InternalClient, Joi, prisma, RESULT, Ride } from '..';
 
 export class Payment {

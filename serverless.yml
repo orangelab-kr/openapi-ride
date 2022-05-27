@@ -15,9 +15,9 @@ package:
 
 plugins:
   - serverless-webpack
-  - serverless-dotenv-plugin
-  - serverless-offline
   - serverless-webpack-prisma
+  - serverless-doppler
+  - serverless-offline
 
 custom:
   webpack:
@@ -30,8 +30,10 @@ functions:
   app:
     handler: src/index.handler
     events:
-      - http: 'ANY /'
-      - http: 'ANY /{proxy+}'
+      - http:
+          method: ANY
+          path: '{proxy+}'
+
   returnedPhotoChecker:
     handler: src/schedulers/returnedPhotoChecker.onReturnedPhotoChecker
     events:

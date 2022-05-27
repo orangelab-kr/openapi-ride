@@ -13,7 +13,7 @@ import {
   InternalKickboardMode,
   InternalPlatform,
   WebhookPermission,
-} from 'openapi-internal-sdk';
+} from '@hikick/openapi-internal-sdk';
 import {
   BorrowedHelmet,
   Geometry,

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { PlatformPermission } from 'openapi-internal-sdk';
+import { PlatformPermission } from '@hikick/openapi-internal-sdk';
 import {
   getInternalRidesLightsRouter,
   getInternalRidesLockRouter,

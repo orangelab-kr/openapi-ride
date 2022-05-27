@@ -82,10 +82,8 @@ export function Wrapper(cb: WrapperCallback): WrapperCallback {
       }
 
       if (!result) {
-        if (process.env.NODE_ENV !== 'prod') {
-          logger.error(err.message);
-          logger.error(err.stack);
-        }
+        logger.error(err.message);
+        logger.error(err.stack);
 
         result = RESULT.INVALID_ERROR();
       }

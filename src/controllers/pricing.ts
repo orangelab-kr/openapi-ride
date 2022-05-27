@@ -6,7 +6,7 @@ import {
   InternalLocationPricing,
   InternalLocationProfile,
   LocationPermission,
-} from 'openapi-internal-sdk';
+} from '@hikick/openapi-internal-sdk';
 import { InternalClient, Joi, RESULT } from '..';
 
 type ReceiptUnit = Prisma.ReceiptUnitModelCreateInput;
