@@ -6,6 +6,7 @@ import {
   RideModel,
 } from '@prisma/client';
 import { Joi, Payment, prisma } from '..';
+import { sendMessageWithMessageGateway } from '../tools/messageGateway';
 
 export class Monitoring {
   public static async getMonitoringLogs(
@@ -41,7 +42,7 @@ export class Monitoring {
       price?: number;
     }
   ): Promise<RideModel> {
-    const { rideId } = ride;
+    const { rideId, phone } = ride;
     const { monitoringStatus, sendMessage, price } = await Joi.object({
       monitoringStatus: Joi.string()
         .valid(...Object.keys(MonitoringStatus))
@@ -76,12 +77,36 @@ export class Monitoring {
     }
 
     if (sendMessage) {
-      // TODO: Send Alimtalk
-      await Monitoring.addMonitoringLog(
-        updatedRide,
-        MonitoringLogType.SEND_MESSAGE,
-        '메세지를 전송하였습니다.'
-      );
+      type templates =
+        | 'monitoring_danger_parking'
+        | 'monitoring_in_collection_area'
+        | 'monitoring_towed'
+        | 'monitoring_wrong_picture';
+
+      const templateBySituation: {
+        [key in MonitoringStatus]: templates | null;
+      } = {
+        BEFORE_CONFIRM: null,
+        CONFIRMED: null,
+        WRONG_PARKING: 'monitoring_danger_parking',
+        DANGER_PARKING: 'monitoring_danger_parking',
+        IN_COLLECTION_AREA: 'monitoring_in_collection_area',
+        WRONG_PICTURE: 'monitoring_wrong_picture',
+        NO_PICTURE: 'monitoring_wrong_picture',
+        COLLECTED_KICKBOARD: 'monitoring_towed',
+        TOWED_KICKBOARD: 'monitoring_towed',
+      };
+
+      const name = templateBySituation[monitoringStatus as MonitoringStatus];
+      if (name) {
+        const fields = { ride };
+        await sendMessageWithMessageGateway({ phone, name, fields });
+        await Monitoring.addMonitoringLog(
+          updatedRide,
+          MonitoringLogType.SEND_MESSAGE,
+          '메세지를 전송하였습니다.'
+        );
+      }
     }
 
     if (isFinalAction && price) {
