@@ -1,5 +1,3 @@
-import { Prisma, RideModel } from '@prisma/client';
-import dayjs from 'dayjs';
 import {
   DiscountPermission,
   InternalDiscountGroup,
@@ -7,6 +5,8 @@ import {
   InternalLocationProfile,
   LocationPermission,
 } from '@hikick/openapi-internal-sdk';
+import { Prisma, RideModel } from '@prisma/client';
+import dayjs from 'dayjs';
 import { InternalClient, Joi, RESULT } from '..';
 
 type ReceiptUnit = Prisma.ReceiptUnitModelCreateInput;
@@ -65,8 +65,8 @@ export class Pricing {
 
   public static getReceiptToCreateInput(
     receipt: Receipt
-  ): Prisma.ReceiptModelUpdateOneWithoutRidesInput {
-    const input: Prisma.ReceiptModelUpdateOneWithoutRidesInput = {};
+  ): Prisma.ReceiptModelUpdateOneWithoutRidesNestedInput {
+    const input: Prisma.ReceiptModelUpdateOneWithoutRidesNestedInput = {};
     const {
       isNightly,
       price,
