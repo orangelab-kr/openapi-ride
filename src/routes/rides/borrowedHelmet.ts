@@ -6,7 +6,7 @@ export function getRidesBorrowedHelmetRouter(): Router {
 
   router.get(
     '/',
-    CurrentBorrowedHelmet(),
+    CurrentBorrowedHelmet({ throwIfNotBorrowed: false }),
     Wrapper(async (req) => {
       const { helmet } = req;
       throw RESULT.SUCCESS({ details: { helmet } });
