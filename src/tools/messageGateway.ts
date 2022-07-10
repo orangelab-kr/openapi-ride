@@ -1,4 +1,4 @@
-import got from 'got';
+import axios from 'axios';
 
 export async function sendMessageWithMessageGateway(props: {
   phone: string;
@@ -11,13 +11,12 @@ export async function sendMessageWithMessageGateway(props: {
     MESSAGE_GATEWAY_SECRET_ACCESS_KEY,
   } = process.env;
 
-  await got({
-    method: 'POST',
-    url: `${MESSAGE_GATEWAY_URL}/send`,
-    json: props,
+  await axios.post(`${MESSAGE_GATEWAY_URL}/send`, props, {
     headers: {
-      'X-MESSAGE-GATEWAY-ACCESS-KEY-ID': MESSAGE_GATEWAY_ACCESS_KEY_ID,
-      'X-MESSAGE-GATEWAY-SECRET-ACCESS-KEY': MESSAGE_GATEWAY_SECRET_ACCESS_KEY,
+      'X-MESSAGE-GATEWAY-ACCESS-KEY-ID': String(MESSAGE_GATEWAY_ACCESS_KEY_ID),
+      'X-MESSAGE-GATEWAY-SECRET-ACCESS-KEY': String(
+        MESSAGE_GATEWAY_SECRET_ACCESS_KEY
+      ),
     },
-  }).json();
+  });
 }
