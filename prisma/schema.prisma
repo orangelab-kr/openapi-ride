@@ -19,7 +19,7 @@ model RideModel {
 
   discountGroupId String?
   discountId      String?
-  insuranceId     String
+  insuranceId     String?
 
   // 보험 정보
   userId   String

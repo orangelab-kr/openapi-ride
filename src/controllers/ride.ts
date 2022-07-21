@@ -1,19 +1,19 @@
 import {
+  InsurancePermission,
+  InternalDiscount,
+  InternalKickboardMode,
+  InternalPlatform,
+  WebhookPermission
+} from '@hikick/openapi-internal-sdk';
+import {
   MonitoringLogType,
   MonitoringStatus,
   PaymentType,
   Prisma,
   RideModel,
-  RideTerminatedType,
+  RideTerminatedType
 } from '@prisma/client';
 import dayjs from 'dayjs';
-import {
-  InsurancePermission,
-  InternalDiscount,
-  InternalKickboardMode,
-  InternalPlatform,
-  WebhookPermission,
-} from '@hikick/openapi-internal-sdk';
 import {
   BorrowedHelmet,
   Geometry,
@@ -23,7 +23,7 @@ import {
   Payment,
   Pricing,
   prisma,
-  RESULT,
+  RESULT
 } from '..';
 
 export interface RideTimeline {
@@ -275,7 +275,6 @@ export class Ride {
 
     await kickboard.start();
     await kickboard.setPhoto(null);
-
     const { franchiseId, regionId } = kickboard;
     if (discountGroupId && discountId) {
       await InternalClient.getDiscount()
@@ -284,19 +283,19 @@ export class Ride {
         .then((discount) => discount.update({ lockedAt: new Date() }));
     }
 
-    const insuranceClient = InternalClient.getInsurance([
-      InsurancePermission.INSURANCE_START,
-    ]);
+    // const insuranceClient = InternalClient.getInsurance([
+    //   InsurancePermission.INSURANCE_START,
+    // ]);
 
-    const { insuranceId } = await insuranceClient.start({
-      provider: 'mertizfire',
-      userId,
-      platformId,
-      kickboardCode,
-      phone,
-      latitude,
-      longitude,
-    });
+    // const { insuranceId } = await insuranceClient.start({
+    //   provider: 'mertizfire',
+    //   userId,
+    //   platformId,
+    //   kickboardCode,
+    //   phone,
+    //   latitude,
+    //   longitude,
+    // });
 
     const startedPhoneLocation: Prisma.LocationModelCreateNestedOneWithoutStartedPhoneLocationInput =
       {
@@ -320,7 +319,7 @@ export class Ride {
         platformId,
         franchiseId,
         regionId,
-        insuranceId,
+        // insuranceId,
         startedPhoneLocation,
         startedKickboardLocation,
       },
@@ -489,18 +488,18 @@ export class Ride {
       create: { latitude: gps.latitude, longitude: gps.longitude },
     };
 
-    const insuranceClient = InternalClient.getInsurance([
-      InsurancePermission.INSURANCE_END,
-      InsurancePermission.INSURANCE_VIEW,
-    ]);
+    // const insuranceClient = InternalClient.getInsurance([
+    //   InsurancePermission.INSURANCE_END,
+    //   InsurancePermission.INSURANCE_VIEW,
+    // ]);
 
-    if (insuranceId) {
-      try {
-        await insuranceClient
-          .getInsurance(insuranceId)
-          .then((insurance) => insurance.end({ endedAt: terminatedAt }));
-      } catch (err: any) {}
-    }
+    // if (insuranceId) {
+    //   try {
+    //     await insuranceClient
+    //       .getInsurance(insuranceId)
+    //       .then((insurance) => insurance.end({ endedAt: terminatedAt }));
+    //   } catch (err: any) {}
+    // }
 
     const { receipt, pricing } = await Pricing.getPricingByRide(ride, {
       latitude: gps.latitude,
