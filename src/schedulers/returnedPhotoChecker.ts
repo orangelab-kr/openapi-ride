@@ -1,7 +1,7 @@
-import { logger, Monitoring, Ride } from '..';
-import * as Sentry from '@sentry/node';
 import { MonitoringStatus, RideModel } from '@prisma/client';
+import * as Sentry from '@sentry/node';
 import dayjs from 'dayjs';
+import { logger, Monitoring, Ride } from '..';
 
 export const processRide = async (ride: RideModel) => {
   const { rideId, realname, userId, phone } = ride;
@@ -9,7 +9,7 @@ export const processRide = async (ride: RideModel) => {
   try {
     await Monitoring.setMonitoringStatus(ride, {
       monitoringStatus: MonitoringStatus.NO_PICTURE,
-      sendMessage: true,
+      sendMessage: false,
     });
 
     logger.info(
