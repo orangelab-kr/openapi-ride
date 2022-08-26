@@ -3,7 +3,7 @@ import {
   InternalDiscount,
   InternalKickboardMode,
   InternalPlatform,
-  WebhookPermission
+  WebhookPermission,
 } from '@hikick/openapi-internal-sdk';
 import {
   MonitoringLogType,
@@ -11,9 +11,8 @@ import {
   PaymentType,
   Prisma,
   RideModel,
-  RideTerminatedType
+  RideTerminatedType,
 } from '@prisma/client';
-import dayjs from 'dayjs';
 import {
   BorrowedHelmet,
   Geometry,
@@ -23,7 +22,7 @@ import {
   Payment,
   Pricing,
   prisma,
-  RESULT
+  RESULT,
 } from '..';
 
 export interface RideTimeline {
@@ -340,9 +339,6 @@ export class Ride {
     const { kickboardCode, terminatedAt } = ride;
     if (ride.photo) throw RESULT.ALREADY_PHOTO_UPLOAD();
     if (!terminatedAt) throw RESULT.PHOTO_UPLOAD_NOT_TERMINATE();
-    if (dayjs(terminatedAt).add(30, 'minutes').isBefore(dayjs())) {
-      throw RESULT.PHOTO_UPLOAD_TIMEOUT();
-    }
 
     const { rideId } = ride;
     await prisma.rideModel.update({
